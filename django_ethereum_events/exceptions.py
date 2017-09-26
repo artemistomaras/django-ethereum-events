@@ -1,0 +1,2 @@
+class UnknownBlock(Exception):
+    pass
