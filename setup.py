@@ -7,17 +7,29 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+install_requires = [
+    "Django>=1.10",
+    "celery>=3.1.25,<4.0.0rc3",
+    "ethereum>=1.6.0,<2.0.0",
+    "ethereum-abi-utils>=0.4.1",
+    "ethereum-utils>=0.4.0",
+    "django-solo>=1.1.0",
+    "web3[tester]"
+]
+
 setup(
     name='django-ethereum-events',
     version='0.1.0',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=install_requires,
     license='MIT License',
-    description='Todo',
+    description='Django Ethereum Events',
     long_description=README,
-    url='https://www.example.com/',
+    url='https://github.com/artemistomaras/django-ethereum-events',
     author='Artemios Tomaras',
-    author_email='yourname@example.com',
+    author_email='artemistomaras@gmail.com',
+    keywords='ethereum',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
