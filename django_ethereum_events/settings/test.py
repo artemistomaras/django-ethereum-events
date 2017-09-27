@@ -1,6 +1,5 @@
 import json
 from os import path, pardir
-from .base import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = path.dirname(path.dirname(path.abspath(path.join(__file__, pardir))))
@@ -55,6 +54,13 @@ TEST_EVENT_ABI = """
   "type": "event"
 }
 """
+
+# ==================================
+# ETHEREUM CONFIGURATION
+# ==================================
+ETHEREUM_NODE_HOST = 'localhost'
+ETHEREUM_NODE_PORT = 8545
+ETHEREUM_NODE_SSL = False
 
 ETHEREUM_EVENTS = [
     {

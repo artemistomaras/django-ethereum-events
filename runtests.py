@@ -1,7 +1,8 @@
-import os, sys
-
-from django.conf import settings
+import os
+import sys
 import django
+from django.conf import settings
+
 
 def runtests():
     settings_file = 'django_ethereum_events.settings.test'

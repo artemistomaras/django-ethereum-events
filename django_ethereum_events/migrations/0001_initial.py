@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Daemon',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('block_number', models.IntegerField(default=0)),
                 ('last_error_block_number', models.IntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),

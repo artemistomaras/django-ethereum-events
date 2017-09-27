@@ -1,9 +1,8 @@
 import json
 from django.test import TestCase
-from django.conf import settings
-from web3 import Web3, EthereumTesterProvider
-#from web3.providers.eth_tester import EthereumTesterProvider
-from eth_tester import EthereumTester
+from web3 import EthereumTesterProvider
+# from web3.providers.eth_tester import EthereumTesterProvider
+# from eth_tester import EthereumTester
 from .test_event_receivers import data
 from ..event_listener import EventListener
 from ..models import Daemon
@@ -62,8 +61,8 @@ class EventListenerTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         abi = json.loads(TEST_CONTRACT_ABI)
-        #cls.eth_tester = EthereumTester()
-        #cls.provider = EthereumTesterProvider(cls.eth_tester)
+        # cls.eth_tester = EthereumTester()
+        # cls.provider = EthereumTesterProvider(cls.eth_tester)
         cls.provider = EthereumTesterProvider()
         cls.event_listener = EventListener(rpc_provider=cls.provider)
         cls.web3 = cls.event_listener.web3
@@ -73,12 +72,13 @@ class EventListenerTestCase(TestCase):
         tx_hash = cls.contract_factory.deploy({'from': cls.web3.eth.accounts[0]})
         contract_address = cls.web3.eth.getTransactionReceipt(tx_hash).get('contractAddress')
         cls.contract_factory = cls.web3.eth.contract(contract_address, abi=abi)
-        #cls.snapshot = cls.eth_tester.take_snapshot()
+        # cls.snapshot = cls.eth_tester.take_snapshot()
 
         cls.event_listener.decoder.topics_map[cls.event_listener.decoder.topics[0]] = {
             'CONTRACT_ADDRESS': contract_address,
             'EVENT_ABI': abi[1],
-            'EVENT_RECEIVER': 'django_ethereum_events.tests.test_event_receivers.DepositEventReceiver'
+            'EVENT_RECEIVER':
+                'django_ethereum_events.tests.test_event_receivers.DepositEventReceiver'
         }
 
         cls.event_listener.decoder.watched_addresses = [contract_address]
@@ -101,8 +101,8 @@ class EventListenerTestCase(TestCase):
         self.assertEqual(d.block_number, self.web3.eth.blockNumber, 'Block number updated')
 
     def test_get_logs(self):
-        #logs, _ = self.event_listener.get_logs(self.web3.eth.blockNumber)
-        #self.assertEqual(logs, [], 'No transaction therefore no logs')
+        # logs, _ = self.event_listener.get_logs(self.web3.eth.blockNumber)
+        # self.assertEqual(logs, [], 'No transaction therefore no logs')
 
         # Create a transaction
         tx_data = {'from': self.web3.eth.accounts[0], 'value': 1000000000000000000}
@@ -115,6 +115,6 @@ class EventListenerTestCase(TestCase):
         # Create a transaction
         print(self.event_listener.decoder.topics)
         tx_data = {'from': self.web3.eth.accounts[0], 'value': 1000000000000000000}
-        tx_hash = self.contract_factory.transact(tx_data).deposit('0xCAFEBABA')  # deposit 1 ether
+        self.contract_factory.transact(tx_data).deposit('0xCAFEBABA')  # deposit 1 ether
         self.event_listener.execute()
         self.assertEqual(len(data), 1, '')
