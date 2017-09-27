@@ -2,7 +2,7 @@
 django-ethereum-events
 ######################
 
-Ethereum Event Log monitoring in Django
+Ethereum Contract Event Log monitoring in Django
 
 .. image:: https://travis-ci.org/artemistomaras/django-ethereum-events.svg?branch=master
     :target: https://travis-ci.org/artemistomaras/django-ethereum-events
