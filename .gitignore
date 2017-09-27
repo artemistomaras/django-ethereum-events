@@ -3,3 +3,4 @@ dist
 db.sqlite3
 django_ethereum_events.egg-info/*
 /makemigrations.py
+build
