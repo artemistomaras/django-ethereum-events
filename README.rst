@@ -45,7 +45,7 @@ Installation
 
     ::
 
-        python manage.py makemigrations django-ethereum_events
+        python manage.py makemigrations django_ethereum_events
 
 
 *****
