@@ -11,15 +11,14 @@ install_requires = [
     "Django>=1.10",
     "celery>=3.1.25,<4.0.0rc3",
     "ethereum>=1.6.0,<2.0.0",
-    "ethereum-abi-utils>=0.4.1",
     "ethereum-utils>=0.4.0",
     "django-solo>=1.1.0",
-    "web3[tester]"
+    "web3[tester]<=3.16.4"
 ]
 
 setup(
     name='django-ethereum-events',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(),
     include_package_data=True,
     install_requires=install_requires,

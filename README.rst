@@ -41,11 +41,11 @@ Installation
         INSTALLED_APPS += ('django_ethereum_events')
 
    
-3.  Make necassery migrations
+3.  Make necessary migrations
 
     ::
 
-        python manage.py makemigrations django_ethereum_events
+        python manage.py migrate django_ethereum_events
 
 
 *****
