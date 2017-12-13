@@ -18,7 +18,6 @@ eth-testrpc==1.3.3
 eth-utils==0.7.1
 ethereum==1.6.1
 ethereum-tester==0.1.0a6
-ethereum-utils==0.4.1
 idna==2.6
 json-rpc==1.10.8
 kombu==3.0.37
