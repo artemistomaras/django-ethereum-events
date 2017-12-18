@@ -18,7 +18,8 @@ class Web3Service(metaclass=Singleton):
             rpc_provider = RPCProvider(
                 host=settings.ETHEREUM_NODE_HOST,
                 port=settings.ETHEREUM_NODE_PORT,
-                ssl=settings.ETHEREUM_NODE_SSL
+                ssl=settings.ETHEREUM_NODE_SSL,
+                timeout=getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
             )
         self.web3 = Web3(rpc_provider)
         super(Web3Service, self).__init__()
