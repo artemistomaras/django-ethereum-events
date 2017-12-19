@@ -7,6 +7,18 @@ from .singleton import Singleton
 logger = logging.getLogger(__name__)
 
 
+def force_hex(value):
+    """Given a :obj:`str` or :obj:`bytes`, always returns a hex string.
+
+    This ensures consistency between Web3 3.x which uses :obj:`str`,
+    and 4.x which uses :obj:`bytes` subclass :obj:`HexBytes`"""
+    if isinstance(value, bytes):
+        value = value.hex()
+        if not value.startswith("0x"):
+            value = "0x" + value
+    return value
+
+
 class Decoder(metaclass=Singleton):
     """Transaction decoder implementation.
 
@@ -23,7 +35,7 @@ class Decoder(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         super(Decoder, self).__init__(*args, **kwargs)
         for event in settings.ETHEREUM_EVENTS:
-            topic = self.get_topic(event['EVENT_ABI'])
+            topic = force_hex(self.get_topic(event['EVENT_ABI']))
             self.topics.append(topic)
             self.topics_map[topic] = event
             self.watched_addresses.append(event['CONTRACT_ADDRESS'])
@@ -56,8 +68,9 @@ class Decoder(metaclass=Singleton):
             The decoded log.
         """
 
-        log_topic = log['topics'][0]
-        return log_topic, get_event_data(self.topics_map[log_topic]['EVENT_ABI'], log)
+        log_topic = force_hex(log['topics'][0])
+        event_abi = self.topics_map[log_topic]['EVENT_ABI']
+        return log_topic, get_event_data(event_abi, log)
 
     def decode_logs(self, logs):
         """Decode the given logs.
