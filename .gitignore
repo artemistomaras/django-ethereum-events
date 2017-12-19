@@ -1,7 +1,24 @@
-.tox/*
-dist
-db.sqlite3
-django_ethereum_events.egg-info/*
+# Python
+*.py[cd]
+__pycache__
+
+# Testing tools
+/.tox
+/.coverage*
+
+# Packaging
+/dist
+/build
+*.egg-info
+
+# Utility
+*.sqlite3
 /makemigrations.py
-build
-.idea/
+/.idea
+/.vscode
+
+# Temporary
+*~
+*.tmp
+*.bak
+*.swp
