@@ -45,12 +45,19 @@ class EventListener(metaclass=Singleton):
             The list of relevant log entries.
         """
         # Note: web3.eth.getLogs is not implemented in web3 3.x
-        return self.web3.manager.request_blocking("eth_getLogs", [{
+        # And even in web3 4.0.x betas it's missing in test RPC implementation
+        log_filter = self.web3.eth.filter({
             "fromBlock": hex(from_block),
             "toBlock": hex(to_block),
             "address": self.decoder.watched_addresses,
             "topics": self.decoder.topics,
-        }])
+        })
+        if hasattr(log_filter, "get_all_entries"):
+            logs = log_filter.get_all_entries()
+        else:
+            logs = self.web3.eth.getFilterLogs(log_filter.filter_id)
+        self.web3.eth.uninstallFilter(log_filter.filter_id)
+        return logs
 
     def save_events(self, decoded_logs):
         """Fires the appropriate event receivers for every given log.
