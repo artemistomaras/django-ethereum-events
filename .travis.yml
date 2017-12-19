@@ -19,6 +19,8 @@ env:
 matrix:
   exclude:
     - python: "2.7"
+      env: DJANGO=2.0 WEBTHREE=3.16
+    - python: "2.7"
       env: DJANGO=1.10 WEBTHREE=4.0b
     - python: "2.7"
       env: DJANGO=1.11 WEBTHREE=4.0b
