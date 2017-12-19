@@ -1,8 +1,7 @@
 import logging
 from django.conf import settings
-from ethereum.utils import sha3
 from web3.utils.events import get_event_data
-from eth_utils import encode_hex
+from eth_utils import encode_hex, keccak
 from .singleton import Singleton
 
 logger = logging.getLogger(__name__)
@@ -30,13 +29,13 @@ class Decoder(metaclass=Singleton):
             self.watched_addresses.append(event['CONTRACT_ADDRESS'])
 
     def get_topic(self, item):
-        """Retrieve the sha3 hash of the event abi.
+        """Retrieve the keccak hash of the event abi.
 
         Args:
             item (:obj:`dict`): `settings.ETHEREUM_EVENTS` entry.
 
         Returns:
-            str: the hex encoded sha3 topic signature.
+            str: the hex encoded keccak topic signature.
         """
         method_header = None
         if item.get(u'inputs'):
@@ -44,7 +43,7 @@ class Decoder(metaclass=Singleton):
                 map(lambda input_arg: input_arg[u'type'], item[u'inputs'])))
         else:
             method_header = "{}()".format(item[u'name'])
-        return encode_hex(sha3(method_header))
+        return encode_hex(keccak(method_header))
 
     def decode_log(self, log):
         """Decodes a retrieved relevant log.

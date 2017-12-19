@@ -7,13 +7,15 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-install_requires = [
+DEPENDENCIES = [
     "Django>=1.10",
-    "celery>=3.1.25,<4.0.0rc3",
-    "ethereum>=1.6.0,<2.0.0",
-    "ethereum-utils>=0.4.0",
+    "celery>=3.1.25",
+    "eth-utils>=0.7.0",
     "django-solo>=1.1.0",
-    "web3[tester]<=3.16.4"
+    "web3>=3.16.4",
+]
+TEST_DEPENDENCIES = [
+    "eth-testrpc>=1.3.3",
 ]
 
 setup(
@@ -21,7 +23,11 @@ setup(
     version='0.1.2',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=install_requires,
+    install_requires=DEPENDENCIES,
+    tests_require=TEST_DEPENDENCIES,
+    extras_require={
+        "test": TEST_DEPENDENCIES,
+    },
     license='MIT License',
     description='Django Ethereum Events',
     long_description=README,
