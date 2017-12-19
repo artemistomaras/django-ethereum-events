@@ -1,0 +1,35 @@
+[flake8]
+exclude =
+    .git,
+    .tox,
+    __pycache__,
+    **/migrations/*,
+    *~
+max-line-length = 79
+
+application-import-names =
+  django_ethereum_events
+
+ignore =
+  # D100: Missing docstring in public module
+  D100,
+  # D101: Missing docstring in public class
+  D101,
+  # D102: Missing docstring in public method
+  D102,
+  # D103: Missing docstring in public function
+  D103,
+  # D104: Missing docstring in public package
+  D104,
+  # D105: Missing docstring in magic method
+  D105,
+  # D106: Missing docstring in public nested class
+  D106,
+  # D107: Missing docstring in __init__
+  D107,
+  # D401: First line should be in imperative mood
+  D401,
+  # S001: Found module formatter
+  S001,
+  # Q000: Remove bad quotes
+  Q000

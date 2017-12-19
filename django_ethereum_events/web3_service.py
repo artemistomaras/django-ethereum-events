@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.utils.six import with_metaclass
+
 from web3 import Web3
+
 try:
     from web3 import HTTPProvider
     RPCProvider = None
@@ -18,7 +20,8 @@ class Web3Service(with_metaclass(Singleton)):
         """Initializes the `web3` object.
 
         Args:
-            rpc_provider (:obj:`Provider`, optional): Valid `web3` Provider instance.
+            rpc_provider (:obj:`Provider`, optional): Valid `web3` Provider
+                instance.
         """
         rpc_provider = kwargs.pop('rpc_provider', None)
         if not rpc_provider:

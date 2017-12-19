@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+
 from django.utils.six import with_metaclass
 
 

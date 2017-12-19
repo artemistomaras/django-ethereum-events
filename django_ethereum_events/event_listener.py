@@ -1,11 +1,11 @@
+from django.conf import settings
+from django.utils.module_loading import import_string
+from django.utils.six import with_metaclass
+
 from .decoder import Decoder
 from .models import Daemon
 from .singleton import Singleton
 from .web3_service import Web3Service
-from .exceptions import UnknownBlock
-from django.conf import settings
-from django.utils.module_loading import import_string
-from django.utils.six import with_metaclass
 
 
 class EventListener(with_metaclass(Singleton)):
@@ -17,16 +17,22 @@ class EventListener(with_metaclass(Singleton)):
         self.web3 = Web3Service(*args, **kwargs).web3
 
     def get_pending_blocks(self):
-        """Retrieve the blocks that have not been processed.
+        """
+        Retrieve the blocks that have not been processed.
 
         Returns:
-            An iterable of (from, to) tuples containing the unprocessed block numbers.
+            An iterable of (from, to) tuples, containing
+            the unprocessed block numbers.
+
         """
         daemon = Daemon.get_solo()
         current = self.web3.eth.blockNumber
         step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
         if daemon.block_number < current:
-            return ((r, min(current, r + step)) for r in range(daemon.block_number + 1, current + 1, step))
+            return (
+                (r, min(current, r + step))
+                for r in range(daemon.block_number + 1, current + 1, step)
+            )
         return []
 
     def update_block_number(self, block_number):
@@ -36,7 +42,8 @@ class EventListener(with_metaclass(Singleton)):
         daemon.save()
 
     def get_logs(self, from_block, to_block):
-        """Retrieves the relevant log entries from the given block range.
+        """
+        Retrieves the relevant log entries from the given block range.
 
         Args:
             from_block (int): The first block number.
@@ -44,6 +51,7 @@ class EventListener(with_metaclass(Singleton)):
 
         Returns:
             The list of relevant log entries.
+
         """
         # Note: web3.eth.getLogs is not implemented in web3 3.x
         # And even in web3 4.0.x betas it's missing in test RPC implementation
@@ -61,15 +69,18 @@ class EventListener(with_metaclass(Singleton)):
         return logs
 
     def save_events(self, decoded_logs):
-        """Fires the appropriate event receivers for every given log.
+        """
+        Fires the appropriate event receivers for every given log.
 
         Args:
             decoded_logs (:obj:`list` of :obj:`dict`): The decoded logs.
+
         """
         for topic, decoded_log in decoded_logs:
-            EventReceiver = import_string(
-                self.decoder.topics_map[topic]['EVENT_RECEIVER'])
-            EventReceiver().save(decoded_event=decoded_log)
+            event_receiver_cls = import_string(
+                self.decoder.topics_map[topic]['EVENT_RECEIVER']
+            )
+            event_receiver_cls().save(decoded_event=decoded_log)
 
     def execute(self):
         """Program loop, does all the underlying work."""
