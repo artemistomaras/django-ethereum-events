@@ -134,7 +134,7 @@ class EventListenerTestCase(TestCase):
     def test_execute(self):
         # Ensure we've handled everything (test_get_logs could've left us some)
         self.event_listener.execute()
-        data.clear()
+        del data[:]   # 2.7 compat: it's data.clear() in Python 3.3+
 
         # Create a transaction
         tx_data = {
