@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.six import with_metaclass
 from web3 import Web3
 try:
     from web3 import HTTPProvider
@@ -10,7 +11,7 @@ except ImportError:
 from .singleton import Singleton
 
 
-class Web3Service(metaclass=Singleton):
+class Web3Service(with_metaclass(Singleton)):
     """Creates a `web3` instance based on the given `RPCProvider`."""
 
     def __init__(self, *args, **kwargs):

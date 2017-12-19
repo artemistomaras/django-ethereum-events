@@ -5,9 +5,10 @@ from .web3_service import Web3Service
 from .exceptions import UnknownBlock
 from django.conf import settings
 from django.utils.module_loading import import_string
+from django.utils.six import with_metaclass
 
 
-class EventListener(metaclass=Singleton):
+class EventListener(with_metaclass(Singleton)):
     """Event Listener class."""
 
     def __init__(self, *args, **kwargs):

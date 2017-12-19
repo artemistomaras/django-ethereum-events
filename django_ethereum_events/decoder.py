@@ -1,6 +1,7 @@
 import logging
 from django.conf import settings
 from web3.utils.events import get_event_data
+from django.utils.six import with_metaclass
 from eth_utils import encode_hex, keccak
 from .singleton import Singleton
 
@@ -19,7 +20,7 @@ def force_hex(value):
     return value
 
 
-class Decoder(metaclass=Singleton):
+class Decoder(with_metaclass(Singleton)):
     """Transaction decoder implementation.
 
     Attributes:
