@@ -1,0 +1,6 @@
+[run]
+branch = True
+include = django_ethereum_events/*
+omit =
+    */migrations/*.py
+    */tests/*.py

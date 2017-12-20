@@ -5,6 +5,7 @@ __pycache__
 # Testing tools
 /.tox
 /.coverage*
+!/.coveragerc
 
 # Packaging
 /dist
