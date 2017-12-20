@@ -55,10 +55,17 @@ class EventListener(with_metaclass(Singleton)):
         """
         # Note: web3.eth.getLogs is not implemented in web3 3.x
         # And even in web3 4.0.x betas it's missing in test RPC implementation
+        addresses = self.decoder.watched_addresses
+        if len(addresses) == 1:
+            # Ganache (aka ethereumjs-testrpc) doesn't support multiple addrs.
+            # This is to help simple tests pass if there's only one entry.
+            # If you have multiple contracts and test against Ganache,
+            # it's not this library's fault no events are found.
+            addresses = addresses[0]
         log_filter = self.web3.eth.filter({
             "fromBlock": hex(from_block),
             "toBlock": hex(to_block),
-            "address": self.decoder.watched_addresses,
+            "address": addresses,
             "topics": self.decoder.topics,
         })
         if hasattr(log_filter, "get_all_entries"):
