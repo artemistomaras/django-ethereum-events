@@ -25,6 +25,7 @@ class Web3Service(with_metaclass(Singleton)):
         """
         rpc_provider = kwargs.pop('rpc_provider', None)
         if not rpc_provider:
+            timeout = getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
             if HTTPProvider is not None:
                 uri = "{scheme}://{host}:{port}".format(
                     host=settings.ETHEREUM_NODE_HOST,
@@ -33,14 +34,16 @@ class Web3Service(with_metaclass(Singleton)):
                 )
                 rpc_provider = HTTPProvider(
                     endpoint_uri=uri,
-                    timeout=getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
+                    request_kwargs={
+                        "timeout": timeout
+                    }
                 )
             elif RPCProvider is not None:
                 rpc_provider = RPCProvider(
                     host=settings.ETHEREUM_NODE_HOST,
                     port=settings.ETHEREUM_NODE_PORT,
                     ssl=settings.ETHEREUM_NODE_SSL,
-                    timeout=getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
+                    timeout=timeout
                 )
             else:
                 raise ValueError("Cannot instantiate any RPC provider")
