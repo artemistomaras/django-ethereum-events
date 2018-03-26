@@ -17,9 +17,13 @@ __pycache__
 /makemigrations.py
 /.idea
 /.vscode
+/.settings
 
 # Temporary
 *~
 *.tmp
 *.bak
 *.swp
+
+.project
+.pydevproject

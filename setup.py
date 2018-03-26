@@ -11,9 +11,10 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 DEPENDENCIES = [
     "Django>=1.10",
     "celery>=3.1.25",
-    "eth-utils>=0.7.0",
+    "eth-utils<=0.8.1",
+    "eth-abi<=0.5.0",
     "django-solo>=1.1.0",
-    "web3>=3.16.4",
+    "web3<=3.16.5",
 ]
 TEST_DEPENDENCIES = [
     "eth-testrpc>=1.3.3",
