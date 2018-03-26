@@ -60,8 +60,8 @@ Usage
         ETHEREUM_NODE_PORT = 8545
         ETHEREUM_NODE_SSL = False
         ETHEREUM_EVENTS = []
-
- 
+         
+         
 2.  ``ETHEREUM_EVENTS`` parameter is a list of that holds information about the specific events to monitor for. Its syntax is the following
 
     ::
@@ -101,3 +101,5 @@ Usage
             'schedule': crontab(minute='*/5')  # run every 5 minutes
             }
         }
+
+    You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
