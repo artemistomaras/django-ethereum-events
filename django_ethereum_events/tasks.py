@@ -1,11 +1,15 @@
 import logging
 from contextlib import contextmanager
-from .event_listener import EventListener
-from django.core.cache import cache
+
 from celery import shared_task
+
+from django.core.cache import cache
+
+from .event_listener import EventListener
 from .models import Daemon
 
-lock_value = 'LOCK'
+
+LOCK_VALUE = 'LOCK'
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +29,8 @@ def cache_lock(lock_id, lock_value):
 
 @shared_task
 def event_listener():
-    """Celery task that transverses the blockchain looking for event logs.
+    """
+    Celery task that transverses the blockchain looking for event logs.
 
     This task should be run periodically via celerybeat to monitor for
     new blocks in the blockchain.
@@ -37,14 +42,15 @@ def event_listener():
                 'schedule': crontab(minute='*/2')  # run every 2 minutes
             }
         }
+
     """
-    with cache_lock('DJANGO_ETHEREUM_EVENTS', lock_value) as acquired:
+    with cache_lock('DJANGO_ETHEREUM_EVENTS', LOCK_VALUE) as acquired:
         if acquired:
             listener = EventListener()
             try:
                 listener.execute()
             except Exception as e:
-                logger.error(str(e))
+                logger.exception(str(e))
                 # Save error state
                 daemon = Daemon.get_solo()
                 last_error_block_number = daemon.last_error_block_number

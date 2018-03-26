@@ -1,14 +1,43 @@
 language: python
 python:
+  - "2.7"
   - "3.4"
   - "3.5"
   - "3.6"
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+      - libffi-dev
+env:
+  - DJANGO=1.10 WEBTHREE=3.16
+  - DJANGO=1.11 WEBTHREE=3.16
+  - DJANGO=2.0 WEBTHREE=3.16
+  - DJANGO=1.10 WEBTHREE=4.0b
+  - DJANGO=1.11 WEBTHREE=4.0b
+  - DJANGO=2.0 WEBTHREE=4.0b
 matrix:
+  exclude:
+    - python: "2.7"
+      env: DJANGO=2.0 WEBTHREE=3.16
+    - python: "2.7"
+      env: DJANGO=1.10 WEBTHREE=4.0b
+    - python: "2.7"
+      env: DJANGO=1.11 WEBTHREE=4.0b
+    - python: "2.7"
+      env: DJANGO=2.0 WEBTHREE=4.0b
+    - python: "3.4"
+      env: DJANGO=1.10 WEBTHREE=4.0b
+    - python: "3.4"
+      env: DJANGO=1.11 WEBTHREE=4.0b
+    - python: "3.4"
+      env: DJANGO=2.0 WEBTHREE=4.0b
   include:
-    - python: 3.5
+    - python: "3.6"
       env: TOXENV=flake8
 install:
-  - pip install -r requirements.txt
-  - pip install tox-travis
+  - pip install tox-travis codecov
 script:
   - tox
+after_success:
+  - codecov

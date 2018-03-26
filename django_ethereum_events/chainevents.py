@@ -1,7 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+
+from django.utils.six import with_metaclass
 
 
-class AbstractEventReceiver(ABC):
+class AbstractEventReceiver(with_metaclass(ABCMeta)):
     """Abstract EventReceiver class.
 
     For every Event that is monitored, an Event handler that inherits
