@@ -1,7 +1,10 @@
+import itertools
+
 from django.conf import settings
 from django.utils.module_loading import import_string
 from django.utils.six import with_metaclass
 
+from django_ethereum_events.exceptions import UnknownBlock
 from .decoder import Decoder
 from .models import Daemon
 from .singleton import Singleton
@@ -41,6 +44,27 @@ class EventListener(with_metaclass(Singleton)):
         daemon.block_number = block_number
         daemon.save()
 
+    def get_block_logs(self, block_number):
+        """Retrieves the relevant log entries from the given block.
+        Args:
+            block_number (int): The block number of the block to process.
+        Returns:
+            The list of relevant log entries.
+        """
+        block = self.web3.eth.getBlock(block_number)
+        relevant_logs = []
+        if block and block.get('hash'):
+            for tx in block['transactions']:
+                receipt = self.web3.eth.getTransactionReceipt(tx)
+                for log in receipt.get('logs', []):
+                    address = log['address'].lower()
+                    if address in self.decoder.watched_addresses and \
+                            log['topics'][0] in self.decoder.topics:
+                        relevant_logs.append(log)
+            return relevant_logs
+        else:
+            raise UnknownBlock
+
     def get_logs(self, from_block, to_block):
         """
         Retrieves the relevant log entries from the given block range.
@@ -53,27 +77,9 @@ class EventListener(with_metaclass(Singleton)):
             The list of relevant log entries.
 
         """
-        # Note: web3.eth.getLogs is not implemented in web3 3.x
-        # And even in web3 4.0.x betas it's missing in test RPC implementation
-        addresses = self.decoder.watched_addresses
-        if len(addresses) == 1:
-            # Ganache (aka ethereumjs-testrpc) doesn't support multiple addrs.
-            # This is to help simple tests pass if there's only one entry.
-            # If you have multiple contracts and test against Ganache,
-            # it's not this library's fault no events are found.
-            addresses = addresses[0]
-        log_filter = self.web3.eth.filter({
-            "fromBlock": hex(from_block),
-            "toBlock": hex(to_block),
-            "address": addresses,
-            "topics": self.decoder.topics,
-        })
-        if hasattr(log_filter, "get_all_entries"):
-            logs = log_filter.get_all_entries()
-        else:
-            logs = self.web3.eth.getFilterLogs(log_filter.filter_id)
-        self.web3.eth.uninstallFilter(log_filter.filter_id)
-        return logs
+        logs = itertools.chain.from_iterable(
+            self.get_block_logs(n) for n in range(from_block, to_block + 1))
+        return list(logs)
 
     def save_events(self, decoded_logs):
         """

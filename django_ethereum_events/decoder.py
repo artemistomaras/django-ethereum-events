@@ -47,9 +47,12 @@ class Decoder(with_metaclass(Singleton)):
         super(Decoder, self).__init__(*args, **kwargs)
         for event in settings.ETHEREUM_EVENTS:
             topic = force_hex(self.get_topic(event['EVENT_ABI']))
+            address = event['CONTRACT_ADDRESS']
             self.topics.append(topic)
             self.topics_map[topic] = event
-            self.watched_addresses.append(event['CONTRACT_ADDRESS'])
+            if address not in self.watched_addresses:
+                self.watched_addresses.append(address)
+
 
     def get_topic(self, item):
         """
@@ -62,7 +65,6 @@ class Decoder(with_metaclass(Singleton)):
             str: the hex encoded keccak topic signature.
 
         """
-        method_header = None
         if item.get('inputs'):
             method_header = "{name}({args})".format(
                 name=item['name'],
