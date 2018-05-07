@@ -103,3 +103,13 @@ Usage
         }
 
     You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
+
+
+*****
+Resetting the internal state
+*****
+Blocks are processed only once. The last block processed is stored in the ``.models.Daemon`` entry.
+
+To reset the number of blocks processed, run the ``reset_block_daemon`` command optionally specifying the block number (-b, --block) to reset to (defaults to zero). If you reset it to zero, the next time the ``event_listener`` is fired, it will start processing blocks from the genesis block.
+
+The ``Daemon`` entry can also be changed from the django admin backend.
