@@ -1,6 +1,7 @@
 from django.contrib import admin
+
 from solo.admin import SingletonModelAdmin
 
-from django_ethereum_events.models import Daemon
+from .models import Daemon
 
 admin.site.register(Daemon, SingletonModelAdmin)

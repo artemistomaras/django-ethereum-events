@@ -26,5 +26,5 @@ class Command(BaseCommand):
         d.save()
 
         self.stdout.write(self.style.SUCCESS(
-            "Internal block number counter reset to {}.".format(block_number)))
-
+            'Internal block number counter reset to {0}.'.format(block_number)
+        ))

@@ -53,7 +53,6 @@ class Decoder(with_metaclass(Singleton)):
             if address not in self.watched_addresses:
                 self.watched_addresses.append(address)
 
-
     def get_topic(self, item):
         """
         Retrieve the keccak hash of the event abi.

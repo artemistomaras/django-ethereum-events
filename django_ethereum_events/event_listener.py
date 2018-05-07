@@ -4,8 +4,8 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from django.utils.six import with_metaclass
 
-from django_ethereum_events.exceptions import UnknownBlock
 from .decoder import Decoder
+from .exceptions import UnknownBlock
 from .models import Daemon
 from .singleton import Singleton
 from .web3_service import Web3Service
@@ -46,10 +46,12 @@ class EventListener(with_metaclass(Singleton)):
 
     def get_block_logs(self, block_number):
         """Retrieves the relevant log entries from the given block.
+
         Args:
             block_number (int): The block number of the block to process.
         Returns:
             The list of relevant log entries.
+
         """
         block = self.web3.eth.getBlock(block_number)
         relevant_logs = []
