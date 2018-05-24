@@ -118,3 +118,8 @@ Blocks are processed only once. The last block processed is stored in the ``.mod
 To reset the number of blocks processed, run the ``reset_block_daemon`` command optionally specifying the block number (-b, --block) to reset to (defaults to zero). If you reset it to zero, the next time the ``event_listener`` is fired, it will start processing blocks from the genesis block.
 
 The ``Daemon`` entry can also be changed from the django admin backend.
+
+*****
+Proof-of-Authority Networks
+*****
+To use this package on **Rinkeby** or any other private network that uses the Proof-of-Authority consensus engine (also named clique), set the optional ``ETHEREUM_GETH_POA`` setting to ``True``.
