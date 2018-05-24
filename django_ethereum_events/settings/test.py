@@ -66,7 +66,7 @@ ETHEREUM_NODE_SSL = False
 
 ETHEREUM_EVENTS = [
     {
-        'CONTRACT_ADDRESS': '0x0xF54cA23D911fA34ce2FF5F693eaaf83E80576fDe',
+        'CONTRACT_ADDRESS': '0xCfEB869F69431e42cdB54A4F4f105C19C080A601',
         'EVENT_ABI': json.loads(TEST_EVENT_ABI),
         'EVENT_RECEIVER': 'django_ethereum_events.tests' +
                           '.test_event_receivers.DepositEventReceiver'

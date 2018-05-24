@@ -92,7 +92,7 @@ class EventListenerTestCase(TestCase):
         }
 
         cls.event_listener.decoder.watched_addresses = [
-            contract_address.lower()
+            contract_address
         ]
 
     def tearDown(self):
