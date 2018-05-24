@@ -21,6 +21,11 @@ The main concept was inspired by the following project:
 
 - https://github.com/gnosis/django-eth-events
 
+Package versions **0.2.x+** support **web3 v4**.
+
+If you want python 2.7 compatibility and/or **web3 v3** support, use version **0.1.x** of this package.
+
+
 .. _`Contract Events`: http://solidity.readthedocs.io/en/develop/contracts.html#events 
 
 ************
@@ -87,7 +92,7 @@ Usage
 
     The ``decoded_event`` parameter is the decoded log as provided from `web3.utils.events.get_event_data`_ method.
     
-    .. _`web3.utils.events.get_event_data`: https://github.com/pipermerriam/web3.py/blob/master/web3/utils/events.py#L140
+    .. _`web3.utils.events.get_event_data`: https://github.com/pipermerriam/web3.py/blob/master/web3/utils/events.py#L143
 
 4.  To start monitoring the blockchain, either run the celery task ``django_ethereum_events.tasks.event_listener`` or better, use ``celerybeat`` to run it as a periodical task
 
