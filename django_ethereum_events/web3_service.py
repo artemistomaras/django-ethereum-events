@@ -2,13 +2,8 @@ from django.conf import settings
 from django.utils.six import with_metaclass
 
 from web3 import Web3
+from web3 import HTTPProvider
 
-try:
-    from web3 import HTTPProvider
-    RPCProvider = None
-except ImportError:
-    from web3 import RPCProvider
-    HTTPProvider = None
 
 from .singleton import Singleton
 
@@ -37,13 +32,6 @@ class Web3Service(with_metaclass(Singleton)):
                     request_kwargs={
                         "timeout": timeout
                     }
-                )
-            elif RPCProvider is not None:
-                rpc_provider = RPCProvider(
-                    host=settings.ETHEREUM_NODE_HOST,
-                    port=settings.ETHEREUM_NODE_PORT,
-                    ssl=settings.ETHEREUM_NODE_SSL,
-                    timeout=timeout
                 )
             else:
                 raise ValueError("Cannot instantiate any RPC provider")

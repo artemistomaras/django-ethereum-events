@@ -61,7 +61,7 @@ class EventListener(with_metaclass(Singleton)):
                 for log in receipt.get('logs', []):
                     address = log['address'].lower()
                     if address in self.decoder.watched_addresses and \
-                            log['topics'][0] in self.decoder.topics:
+                            log['topics'][0].hex() in self.decoder.topics:
                         relevant_logs.append(log)
             return relevant_logs
         else:

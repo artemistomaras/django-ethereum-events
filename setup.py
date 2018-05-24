@@ -11,14 +11,14 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 DEPENDENCIES = [
     "Django>=1.10",
     "celery>=3.1.25",
-    "eth-utils<=0.8.1",
-    "eth-abi<=0.5.0",
+    "eth-utils>=1.0.1",
+    "eth-abi>=1.0.0",
     "django-solo>=1.1.0",
-    "web3<=3.16.5",
+    "web3>=4.0.0",
     "rlp<=0.6.0"
 ]
 TEST_DEPENDENCIES = [
-    "eth-testrpc>=1.3.3",
+    "eth-tester[pyethereum21]"
 ]
 
 setup(
@@ -48,8 +48,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Internet :: WWW/HTTP',

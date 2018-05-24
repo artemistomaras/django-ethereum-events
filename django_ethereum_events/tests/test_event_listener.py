@@ -1,7 +1,7 @@
 import json
 
 from django.test import TestCase
-
+from eth_tester import EthereumTester, PyEthereum21Backend
 from web3 import EthereumTesterProvider
 
 from .test_event_receivers import data
@@ -63,9 +63,10 @@ class EventListenerTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):   # noqa: N802
         abi = json.loads(TEST_CONTRACT_ABI)
-        # cls.eth_tester = EthereumTester()
-        # cls.provider = EthereumTesterProvider(cls.eth_tester)
-        cls.provider = EthereumTesterProvider()
+        cls.eth_tester = EthereumTester(backend=PyEthereum21Backend())
+        cls.provider = EthereumTesterProvider(cls.eth_tester)
+
+        #cls.provider = EthereumTesterProvider()
         cls.event_listener = EventListener(rpc_provider=cls.provider)
         cls.web3 = cls.event_listener.web3
 
@@ -99,13 +100,17 @@ class EventListenerTestCase(TestCase):
         # self.eth_tester.revert_to_snapshot(self.snapshot)
 
     def test_get_pending_blocks(self):
-        # Mine a little
-        # num_blocks = 5
+        # Blocks to mine
         num_blocks = 2
-        # self.eth_tester.mine_blocks(num_blocks=num_blocks)
-        pending_blocks = list(self.event_listener.get_pending_blocks())
+        old_pending = list(self.event_listener.get_pending_blocks())
+        old_from_block, old_to_block = old_pending[0]
+        self.eth_tester.mine_blocks(num_blocks=num_blocks)
+        new_pending = list(self.event_listener.get_pending_blocks())
+        new_from_block, new_to_block = new_pending[0]
+
         self.assertEqual(
-            pending_blocks, [(1, num_blocks)],
+            (old_from_block, old_to_block + num_blocks),
+            (new_from_block, new_to_block),
             'Pending blocks mismatch the expectation'
         )
 

@@ -73,7 +73,7 @@ class Decoder(with_metaclass(Singleton)):
             )
         else:
             method_header = "{name}()".format(name=item['name'])
-        return encode_hex(keccak(method_header))
+        return encode_hex(keccak(text=method_header))
 
     def decode_log(self, log):
         """
