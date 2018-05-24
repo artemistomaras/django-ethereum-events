@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.utils.six import with_metaclass
 
-from web3 import Web3
-from web3 import HTTPProvider
-
+from web3 import HTTPProvider, Web3
 
 from .singleton import Singleton
 
