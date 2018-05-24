@@ -5,6 +5,7 @@ from django.utils.six import with_metaclass
 
 from eth_utils import encode_hex, keccak
 
+from web3 import Web3
 from web3.utils.events import get_event_data
 
 from .singleton import Singleton
@@ -47,7 +48,7 @@ class Decoder(with_metaclass(Singleton)):
         super(Decoder, self).__init__(*args, **kwargs)
         for event in settings.ETHEREUM_EVENTS:
             topic = force_hex(self.get_topic(event['EVENT_ABI']))
-            address = event['CONTRACT_ADDRESS']
+            address = Web3.toChecksumAddress(event['CONTRACT_ADDRESS'])
             self.topics.append(topic)
             self.topics_map[topic] = event
             if address not in self.watched_addresses:
