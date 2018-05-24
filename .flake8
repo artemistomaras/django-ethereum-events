@@ -4,6 +4,7 @@ exclude =
     .tox,
     __pycache__,
     **/migrations/*,
+    **/tests/*,
     *~
 max-line-length = 79
 
