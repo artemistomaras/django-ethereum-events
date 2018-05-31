@@ -11,12 +11,13 @@ from .singleton import Singleton
 from .web3_service import Web3Service
 
 
-class EventListener(with_metaclass(Singleton)):
+class EventListener():
     """Event Listener class."""
 
     def __init__(self, *args, **kwargs):
         super(EventListener, self).__init__()
-        self.decoder = Decoder()
+        self.daemon = Daemon.get_solo()
+        self.decoder = Decoder(block_number=self.daemon.block_number)
         self.web3 = Web3Service(*args, **kwargs).web3
 
     def get_pending_blocks(self):
@@ -28,21 +29,22 @@ class EventListener(with_metaclass(Singleton)):
             the unprocessed block numbers.
 
         """
-        daemon = Daemon.get_solo()
+        pending_blocks = []
         current = self.web3.eth.blockNumber
+        print('Current block in chain: {}'.format(current))
         step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
-        if daemon.block_number < current:
-            return (
-                (r, min(current, r + step))
-                for r in range(daemon.block_number + 1, current + 1, step)
-            )
-        return []
+        print('Last block proccessed: {}'.format(self.daemon.block_number))
+        if self.daemon.block_number < current:
+            start = self.daemon.block_number + 1
+            pending_blocks = list(range(start, min(current, start + step) + 1))
+
+        print('Got pending blocks: {}'.format(pending_blocks))
+        return pending_blocks
 
     def update_block_number(self, block_number):
         """Updates the internal block_number counter."""
-        daemon = Daemon.get_solo()
-        daemon.block_number = block_number
-        daemon.save()
+        self.daemon.block_number = block_number
+        self.daemon.save()
 
     def get_block_logs(self, block_number):
         """Retrieves the relevant log entries from the given block.
@@ -92,16 +94,15 @@ class EventListener(with_metaclass(Singleton)):
 
         """
         for topic, decoded_log in decoded_logs:
-            event_receiver_cls = import_string(
-                self.decoder.topics_map[topic]['EVENT_RECEIVER']
-            )
+            event_receiver_cls = import_string(self.decoder.topics[topic].event_receiver)
             event_receiver_cls().save(decoded_event=decoded_log)
 
     def execute(self):
         """Program loop, does all the underlying work."""
         pending_blocks = self.get_pending_blocks()
-        for from_block, to_block in pending_blocks:
-            logs = self.get_logs(from_block, to_block)
+        for block in pending_blocks:
+            print('Processing block: {}'.format(block))
+            logs = self.get_block_logs(block)
             decoded_logs = self.decoder.decode_logs(logs)
             self.save_events(decoded_logs)
-            self.update_block_number(to_block)
+            self.update_block_number(block)

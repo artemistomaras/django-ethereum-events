@@ -1,80 +1,59 @@
+import itertools
 import logging
 
-from django.conf import settings
 from django.utils.six import with_metaclass
-
-from eth_utils import encode_hex, keccak
-
-from web3 import Web3
 from web3.utils.events import get_event_data
 
+from django_ethereum_events.models import MonitoredEvent
+from django_ethereum_events.utils import post_process_decoded_log
 from .singleton import Singleton
 
 logger = logging.getLogger(__name__)
 
 
-def force_hex(value):
-    """
-    Given a :obj:`str` or :obj:`bytes`, always returns a hex string.
-
-    This ensures consistency between Web3 3.x which uses :obj:`str`,
-    and 4.x which uses :obj:`bytes` subclass :obj:`HexBytes`.
-    """
-    if isinstance(value, bytes):
-        value = value.hex()
-        if not value.startswith("0x"):
-            value = "0x" + value
-    return value
-
-
-class Decoder(with_metaclass(Singleton)):
+class Decoder:
     """
     Transaction decoder implementation.
 
     Attributes:
-        watched_addresses (:obj:`list` of :obj:`str`): List of contract
-            addresses that are monitored for event logs.
-        topics (:obj:`list` of :obj:`str`): Relevant topics (keccak hash).
-        topics_map (:obj:`dict`): Maps topics to `settings.ETHEREUM_EVENTS`
-            entries.
+        watched_addresses (list): List of contract addresses, in hexstring form, that are monitored for event logs.
+        topics (dict): maps hexstring representation of log topics to MonitoredEvents
+        monitored_events (QuerySet): retrieved monitored events
 
     """
 
+    monitored_events = None
     watched_addresses = []
-    topics = []
-    topics_map = {}
+    topics = {}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, block_number, *args, **kwargs):
         super(Decoder, self).__init__(*args, **kwargs)
-        for event in settings.ETHEREUM_EVENTS:
-            topic = force_hex(self.get_topic(event['EVENT_ABI']))
-            address = Web3.toChecksumAddress(event['CONTRACT_ADDRESS'])
-            self.topics.append(topic)
-            self.topics_map[topic] = event
-            if address not in self.watched_addresses:
-                self.watched_addresses.append(address)
+        self._refresh_from_db(block_number)
 
-    def get_topic(self, item):
-        """
-        Retrieve the keccak hash of the event abi.
+    def _refresh_from_db(self, block_number):
+        """Fetches the monitored events from the database and updates the decoder state variables.
 
         Args:
-            item (:obj:`dict`): `settings.ETHEREUM_EVENTS` entry.
-
-        Returns:
-            str: the hex encoded keccak topic signature.
+            block_number (int): next block to process
 
         """
-        if item.get('inputs'):
-            method_header = "{name}({args})".format(
-                name=item['name'],
-                args=','.join(
-                    input_arg['type'] for input_arg in item['inputs']
-                )
-            )
+        self.watched_addresses.clear()
+        self.topics.clear()
+
+        if self.monitored_events is None:
+            self.monitored_events = MonitoredEvent.objects.all()
         else:
-            method_header = "{name}()".format(name=item['name'])
-        return encode_hex(keccak(text=method_header))
+            self.monitored_events.refresh_from_db()
+
+        for monitored_event in self.monitored_events:
+            self.topics[monitored_event.topic] = monitored_event
+
+            if monitored_event.contract_address not in self.watched_addresses:
+                self.watched_addresses.append(monitored_event.contract_address)
+
+            if monitored_event.monitored_from is None:
+                monitored_event.monitored_from = block_number
+                monitored_event.save()
 
     def decode_log(self, log):
         """
@@ -84,29 +63,23 @@ class Decoder(with_metaclass(Singleton)):
         function.
 
         Args:
-            log (:obj:`dict`): the event log to decode
+            log (AttributeDict): the event log to decode
         Returns:
             The decoded log.
 
         """
-        log_topic = force_hex(log['topics'][0])
-        event_abi = self.topics_map[log_topic]['EVENT_ABI']
-        return log_topic, get_event_data(event_abi, log)
+        log_topic = log['topics'][0].hex()
+        event_abi = self.topics[log_topic].event_abi_parsed
+        decoded_log = get_event_data(event_abi, log)
+        return log_topic, decoded_log
 
     def decode_logs(self, logs):
-        """
-        Decode the given logs.
+        """Decode the given logs.
 
         Args:
-            logs (:obj:`list` of :obj:`dict`): The targeted logs.
+            logs (list): The targeted logs to decode.
         Returns:
-            The decoded logs.
+            list: the decoded logs
 
         """
-        decoded = []
-        for log in logs:
-            try:
-                decoded.append(self.decode_log(log))
-            except Exception as e:
-                logger.exception(str(e))
-        return decoded
+        return [self.decode_log(log) for log in logs]

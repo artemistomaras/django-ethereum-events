@@ -6,7 +6,7 @@ exclude =
     **/migrations/*,
     **/tests/*,
     *~
-max-line-length = 79
+max-line-length = 120
 
 application-import-names =
   django_ethereum_events
