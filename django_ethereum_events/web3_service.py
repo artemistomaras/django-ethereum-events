@@ -3,7 +3,7 @@ from django.utils.six import with_metaclass
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 
-from .singleton import Singleton
+from .utils import Singleton
 
 
 class Web3Service(with_metaclass(Singleton)):

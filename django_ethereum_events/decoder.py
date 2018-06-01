@@ -1,12 +1,8 @@
-import itertools
 import logging
 
-from django.utils.six import with_metaclass
 from web3.utils.events import get_event_data
 
 from django_ethereum_events.models import MonitoredEvent
-from django_ethereum_events.utils import post_process_decoded_log
-from .singleton import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +24,9 @@ class Decoder:
 
     def __init__(self, block_number, *args, **kwargs):
         super(Decoder, self).__init__(*args, **kwargs)
-        self._refresh_from_db(block_number)
+        self.refresh_state(block_number)
 
-    def _refresh_from_db(self, block_number):
+    def refresh_state(self, block_number):
         """Fetches the monitored events from the database and updates the decoder state variables.
 
         Args:
@@ -39,11 +35,7 @@ class Decoder:
         """
         self.watched_addresses.clear()
         self.topics.clear()
-
-        if self.monitored_events is None:
-            self.monitored_events = MonitoredEvent.objects.all()
-        else:
-            self.monitored_events.refresh_from_db()
+        self.monitored_events = MonitoredEvent.objects.all()
 
         for monitored_event in self.monitored_events:
             self.topics[monitored_event.topic] = monitored_event

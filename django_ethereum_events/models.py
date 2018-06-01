@@ -1,16 +1,11 @@
-import inspect
 import json
 
 from django.core.validators import MinLengthValidator
 from django.db import models
-from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
-from eth_utils import is_hex_address, event_abi_to_log_topic, add_0x_prefix
 from solo.models import SingletonModel
-from web3 import Web3
 
-from django_ethereum_events.chainevents import AbstractEventReceiver
-from django_ethereum_events.utils import get_event_abi
+CACHE_UPDATE_KEY = '_django_ethereum_events_update_required'
 
 
 class Daemon(SingletonModel):
@@ -22,30 +17,21 @@ class Daemon(SingletonModel):
 
 
 class EventManager(models.Manager):
-    def register_event(self, event_name, contract_address, contract_abi, event_receiver):
-        if not is_hex_address(contract_address):
-            raise ValueError('Contract address is not a valid hex address')
+    @staticmethod
+    def register_event(event_name, contract_address, contract_abi, event_receiver):
+        from .forms import MonitoredEventForm
+        form = MonitoredEventForm({
+            'name': event_name,
+            'contract_address': contract_address,
+            'event_receiver': event_receiver,
+            'contract_abi': contract_abi
+        })
 
-        event_handler_cls = import_string(event_receiver)
-        if not inspect.isclass(event_handler_cls) or not issubclass(event_handler_cls, AbstractEventReceiver):
-            raise TypeError('{} is not a valid subclass of AbstractEventReceiver class')
+        if form.is_valid():
+            event = form.save()
+            return event
 
-        if isinstance(contract_abi, str):
-            contract_abi = json.loads(contract_abi)
-
-        event_abi = get_event_abi(contract_abi, event_name)
-        topic = event_abi_to_log_topic(event_abi)
-
-        monitored_event = self.model(
-            name=event_name,
-            contract_address=Web3.toChecksumAddress(contract_address),
-            topic=add_0x_prefix(topic.hex()),
-            event_abi=json.dumps(event_abi),
-            event_receiver=event_receiver
-        )
-
-        monitored_event.save()
-        return monitored_event
+        raise ValueError('The following arguments are invalid \n{}'.format(form.errors.as_text()))
 
 
 class MonitoredEvent(models.Model):
@@ -74,3 +60,32 @@ class MonitoredEvent(models.Model):
 
         self._event_abi_parsed = json.loads(self.event_abi)
         return self._event_abi_parsed
+
+
+class FailedEventLog(models.Model):
+    """This model holds the event logs that raised an Exception inside the client's
+    event_receiver method and was left unhandled.
+
+    When a decode log that is passed inside the client's implementation of the `AbstractEventReceiver`
+    raises an exception, the `EventListener` is not halted. Instead, the event log that caused
+    the unhandled expeption is stored in this model, along with all the information for the user to
+    `reply` the invocation of the custom `event_receiver` implementation.
+    """
+    event = models.CharField(max_length=256)
+    transaction_hash = models.CharField(max_length=66, validators=[MinLengthValidator(66)])
+    transaction_index = models.IntegerField()
+    block_hash = models.CharField(max_length=66, validators=[MinLengthValidator(66)])
+    block_number = models.IntegerField()
+    log_index = models.IntegerField()
+    address = models.CharField(max_length=42, validators=[MinLengthValidator(42)])
+    args = models.TextField(default="{}")
+    monitored_event = models.ForeignKey(MonitoredEvent, related_name='failed_events', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Failed to process Event')
+        verbose_name_plural = _('Failed to process Events')
+
+    def __str__(self):
+        return self.event
+

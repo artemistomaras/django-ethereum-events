@@ -1,23 +1,27 @@
 import itertools
+import json
+import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from django.utils.module_loading import import_string
-from django.utils.six import with_metaclass
 
+from django_ethereum_events.utils import refresh_cache_update_value, HexJsonEncoder
 from .decoder import Decoder
 from .exceptions import UnknownBlock
-from .models import Daemon
-from .singleton import Singleton
+from .models import Daemon, CACHE_UPDATE_KEY, FailedEventLog
 from .web3_service import Web3Service
 
+logger = logging.getLogger(__name__)
 
-class EventListener():
+
+class EventListener:
     """Event Listener class."""
 
     def __init__(self, *args, **kwargs):
         super(EventListener, self).__init__()
         self.daemon = Daemon.get_solo()
-        self.decoder = Decoder(block_number=self.daemon.block_number)
+        self.decoder = Decoder(block_number=self.daemon.block_number + 1)
         self.web3 = Web3Service(*args, **kwargs).web3
 
     def get_pending_blocks(self):
@@ -31,14 +35,11 @@ class EventListener():
         """
         pending_blocks = []
         current = self.web3.eth.blockNumber
-        print('Current block in chain: {}'.format(current))
         step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
-        print('Last block proccessed: {}'.format(self.daemon.block_number))
         if self.daemon.block_number < current:
             start = self.daemon.block_number + 1
             pending_blocks = list(range(start, min(current, start + step) + 1))
 
-        print('Got pending blocks: {}'.format(pending_blocks))
         return pending_blocks
 
     def update_block_number(self, block_number):
@@ -94,14 +95,38 @@ class EventListener():
 
         """
         for topic, decoded_log in decoded_logs:
-            event_receiver_cls = import_string(self.decoder.topics[topic].event_receiver)
-            event_receiver_cls().save(decoded_event=decoded_log)
+            event_receiver = self.decoder.topics[topic].event_receiver
+
+            try:
+                event_receiver_cls = import_string(event_receiver)
+                event_receiver_cls().save(decoded_event=decoded_log)
+            except Exception:
+                failed_event = FailedEventLog.objects.create(
+                    event=decoded_log.event,
+                    transaction_hash=decoded_log.transactionHash.hex(),
+                    transaction_index=decoded_log.transactionIndex,
+                    block_hash=decoded_log.blockHash.hex(),
+                    block_number=decoded_log.blockNumber,
+                    log_index=decoded_log.logIndex,
+                    address=decoded_log.address,
+                    args=json.dumps(decoded_log.args, cls=HexJsonEncoder),
+                    monitored_event=self.decoder.topics[topic]
+                )
+
+                logger.error('Exception while calling {}. FailedEventLog with pk={} created.'.format(
+                    event_receiver, failed_event.pk), exc_info=True)
+
+    def check_for_state_updates(self, block_number):
+        update_required = cache.get(CACHE_UPDATE_KEY, False)
+        if update_required:
+            self.decoder.refresh_state(block_number=block_number)
+            refresh_cache_update_value(update_required=False)
 
     def execute(self):
         """Program loop, does all the underlying work."""
         pending_blocks = self.get_pending_blocks()
         for block in pending_blocks:
-            print('Processing block: {}'.format(block))
+            self.check_for_state_updates(block)
             logs = self.get_block_logs(block)
             decoded_logs = self.decoder.decode_logs(logs)
             self.save_events(decoded_logs)

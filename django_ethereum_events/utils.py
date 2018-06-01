@@ -1,6 +1,9 @@
 import json
 
+from django.core.cache import cache
 from eth_utils import event_abi_to_log_topic
+from hexbytes import HexBytes
+from web3.utils.datastructures import AttributeDict
 
 
 def get_event_abi(abi, event_name):
@@ -30,16 +33,29 @@ def event_topic_from_contract_abi(abi, event_name):
     return event_topic.hex()
 
 
-def post_process_decoded_log(decoded_log):
-    """Converts the `AttrDict` to `dict` and the `HexBytes` to `str`
+def refresh_cache_update_value(update_required=False):
+    from .models import CACHE_UPDATE_KEY
+    cache.set(CACHE_UPDATE_KEY, update_required)
 
-    Args:
-        decoded_log (AttrDict): the decoded log
 
-    Returns:
-        dict: the post processed log
-    """
-    mutable_decoded_log = dict(decoded_log)
-    mutable_decoded_log['transactionHash'] = mutable_decoded_log['transactionHash'].hex()
-    mutable_decoded_log['blockHash'] = mutable_decoded_log['blockHash'].hex()
-    return mutable_decoded_log
+class Singleton(type):
+    """Simple singleton implementation."""
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):  # noqa: N805
+        if cls not in cls._instances:
+            cls._instances[cls] = super(
+                Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class HexJsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, HexBytes):
+            return obj.hex()
+        elif isinstance(obj, AttributeDict):
+            return dict(obj)
+        elif isinstance(obj, bytes):
+            return obj.decode('utf-8').rstrip('\u0000')
+        return super().default(obj)

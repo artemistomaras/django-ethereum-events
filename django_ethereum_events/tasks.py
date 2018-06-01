@@ -9,6 +9,7 @@ from .event_listener import EventListener
 from .models import Daemon
 
 
+LOCK_KEY = '_django_ethereum_events_cache_lock'
 LOCK_VALUE = 'LOCK'
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def event_listener():
         }
 
     """
-    with cache_lock('DJANGO_ETHEREUM_EVENTS', LOCK_VALUE) as acquired:
+    with cache_lock(LOCK_KEY, LOCK_VALUE) as acquired:
         if acquired:
             listener = EventListener()
             try:
