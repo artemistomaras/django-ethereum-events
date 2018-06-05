@@ -32,7 +32,7 @@ If you want python 2.7 compatibility and/or **web3 v3** support, use version **0
 Installation
 ************
 
-1.  Either checkout ``django-ethereum-events`` from GitHub, or install using pip:
+1.  Install using pip:
 
     ::
 
@@ -44,7 +44,8 @@ Installation
     ::
 
         INSTALLED_APPS += ('django_ethereum_events')
-
+    
+    if you are using the **admin backend**, also include ``solo`` in your ``INSTALLED_APPS``.
    
 3.  Make necessary migrations
 
@@ -64,26 +65,32 @@ Usage
         ETHEREUM_NODE_HOST = 'localhost'
         ETHEREUM_NODE_PORT = 8545
         ETHEREUM_NODE_SSL = False
-        ETHEREUM_EVENTS = []
          
          
-2.  ``ETHEREUM_EVENTS`` parameter is a list of that holds information about the specific events to monitor for. Its syntax is the following
+2.  Create a new MonitoredEvent
+    
+    ::
+    
+        contract_abi = """
+        The whole contract abi goes here
+        """
+        
+        event = "MyEvent"  # the emitted event name
+        event_receiver = "myapp.event_receivers.CustomEventReceiver"
+        contract_address = "0x10f683d9acc908cA6b7A34726271229B846b0292"  # the address of the contract emitting the event
+        
+        MonitoredEvent.object.register_event(
+            event_name=event,
+            contract_address=contract_address,
+            contract_abi=contract_abi,
+            event_receiver=event_receiver
+        )
+        
+3.  Create an appropriate event receiver
 
     ::
-
-        ETHEREUM_EVENTS = [
-            {
-                'CONTRACT_ADDRESS': 'contract address',
-                'EVENT_ABI': 'abi of the event(not the whole contract abi)',
-                'EVENT_RECEIVER': 'custom event handler'
-            }    
-        ]
-
-
-3.  Create an appropriate ``EVENT_RECEIVER``
-
-    ::
-
+        
+        # inside myapp.event_receivers
         from django_ethereum_events.chainevents import AbstractEventReceiver
 
         class CustomEventReceiver(AbsractEventReceiver):
@@ -103,11 +110,30 @@ Usage
         CELERYBEAT_SCHEDULE = {
         'ethereum_events': {
             'task': 'django_ethereum_events.tasks.event_listener',
-            'schedule': crontab(minute='*/5')  # run every 5 minutes
+            'schedule': crontab(minute='*/1')  # run every minute
             }
         }
 
     You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
+
+
+*****
+More about the event receivers
+*****
+It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own:
+
+    ::
+    
+        # inside the CustomEventReceiver.save method
+        from django_ethereum_events.utils import HexJsonEncoder
+        decoded_event_data = json.dumps(decoded_event, cls=HexJsonEncoder)
+        my_custom_task.delay(decoded_event_data)
+        
+   
+If an unhandled exception is raised inside the event receiver, the ``event_listener`` task logs the error and creates
+a new instance of the ``django_ethereum_events.models.FailedEventLog`` containing all the relevant event information.
+
+The event listener does **not** attempt to rerun ``FailedEventLogs``. That is up to the client implementation.
 
 
 *****
