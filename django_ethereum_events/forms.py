@@ -5,11 +5,13 @@ from django import forms
 from django.forms import widgets
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
-from eth_utils import is_hex_address, event_abi_to_log_topic, add_0x_prefix
+
+from eth_utils import add_0x_prefix, event_abi_to_log_topic, is_hex_address
+
 from web3 import Web3
 
-from .models import MonitoredEvent
 from .chainevents import AbstractEventReceiver
+from .models import MonitoredEvent
 from .utils import get_event_abi
 
 
@@ -33,8 +35,13 @@ class MonitoredEventForm(forms.ModelForm):
 
     def clean_contract_abi(self):
         contract_abi = self.cleaned_data['contract_abi']
+        is_str = isinstance(contract_abi, str)
+        is_list = isinstance(contract_abi, list)
 
-        if isinstance(contract_abi, str):
+        if not (is_str or is_list):
+            raise forms.ValidationError(_('Contract abi must be either `str` or `list`'))
+
+        if is_str:
             try:
                 contract_abi = json.loads(contract_abi)
             except Exception:
@@ -62,20 +69,16 @@ class MonitoredEventForm(forms.ModelForm):
         abi = cleaned_data.get('contract_abi')
 
         try:
-            get_event_abi(abi, name)
+            self._event_abi = get_event_abi(abi, name)
         except ValueError:
             raise forms.ValidationError(_('Event %(name)s cannot be found in the given contract ABI') % {'name': name})
 
     def save(self, commit=True):
-        cd = self.cleaned_data
-        contract_abi = cd['contract_abi']
-
         event = super(MonitoredEventForm, self).save(commit=False)  # event is not ready to be saved
 
-        event_abi = get_event_abi(contract_abi, event.name)
-        topic = event_abi_to_log_topic(event_abi)
+        topic = event_abi_to_log_topic(self._event_abi)
         event.topic = add_0x_prefix(topic.hex())
-        event.event_abi = json.dumps(event_abi)
+        event.event_abi = json.dumps(self._event_abi)
         event.save()
 
         return event

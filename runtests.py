@@ -14,7 +14,7 @@ def runtests():
 
     from django.test.runner import DiscoverRunner
     runner_class = DiscoverRunner
-    test_args = ['django_ethereum_events.tests.test_event_listener']
+    test_args = ['django_ethereum_events']
 
     failures = runner_class(
         verbosity=1, interactive=True, failfast=False).run_tests(test_args)

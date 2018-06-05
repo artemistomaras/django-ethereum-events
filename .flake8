@@ -5,6 +5,7 @@ exclude =
     __pycache__,
     **/migrations/*,
     **/tests/*,
+    **/settings/*,
     *~
 max-line-length = 120
 
@@ -22,9 +23,15 @@ ignore =
   D103,
   # D104: Missing docstring in public package
   D104,
+  # D105 Missing docstring in magic method
+  D105,
+  # D106 Missing docstring in public nested class
+  D106,
   # D107: Missing docstring in __init__
   D107,
   # D401: First line should be in imperative mood
   D401,
+  # D413 Missing blank line after last section
+  D413,
   # Q000: Remove bad quotes
   Q000

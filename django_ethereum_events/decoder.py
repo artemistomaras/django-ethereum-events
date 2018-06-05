@@ -8,8 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class Decoder:
-    """
-    Transaction decoder implementation.
+    """Event log decoder.
 
     Attributes:
         watched_addresses (list): List of contract addresses, in hexstring form, that are monitored for event logs.

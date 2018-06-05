@@ -1,15 +1,17 @@
 import json
+from unittest.mock import patch
 
 from django.test import TestCase
 from eth_tester import EthereumTester, PyEthereum21Backend
 from eth_utils import to_wei, to_bytes
 from web3 import EthereumTesterProvider, Web3
 
+from ..tasks import event_listener
 from .contracts.bank import BANK_ABI_RAW, BANK_BYTECODE
 from .contracts.claim import CLAIM_ABI_RAW, CLAIM_BYTECODE
 from ..chainevents import AbstractEventReceiver
 from ..event_listener import EventListener
-from ..models import MonitoredEvent, FailedEventLog
+from ..models import MonitoredEvent, FailedEventLog, Daemon
 
 # Keeps track of fired events
 claim_events = []
@@ -35,6 +37,11 @@ class BankDepositEventReceiver(AbstractEventReceiver):
 class ErroneousBankDepositEventReceiver(AbstractEventReceiver):
     def save(self, decoded_event):
         raise ValueError
+
+
+def patched_get_block_logs(*args, **kwargs):
+    """Simulates a error raised by the web3 instance"""
+    raise ValueError
 
 
 class EventListenerTestCase(TestCase):
@@ -147,7 +154,7 @@ class EventListenerTestCase(TestCase):
         self._create_deposit_event()
         listener = EventListener(rpc_provider=self.provider)
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
         listener.execute()
@@ -163,10 +170,10 @@ class EventListenerTestCase(TestCase):
         self._create_deposit_event()
         listener = EventListener(rpc_provider=self.provider)
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': 2 * deposit_value})
 
         listener.execute()
@@ -187,12 +194,12 @@ class EventListenerTestCase(TestCase):
         self._create_deposit_event()
         listener = EventListener(rpc_provider=self.provider)
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
         listener.execute()
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': 2 * deposit_value})
 
         listener.execute()
@@ -210,10 +217,10 @@ class EventListenerTestCase(TestCase):
 
         listener = EventListener(rpc_provider=self.provider)
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
-        tx_hash = self.bank_contract.functions.withdraw(withdraw_value).\
+        tx_hash = self.bank_contract.functions.withdraw(withdraw_value). \
             transact({'from': self.web3.eth.accounts[0]})
 
         listener.execute()
@@ -260,7 +267,7 @@ class EventListenerTestCase(TestCase):
 
         event = self._create_deposit_event()
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
         # intention is to the the .monitored_from field, not the cache / update mechanism
@@ -283,7 +290,7 @@ class EventListenerTestCase(TestCase):
 
         event = self._create_deposit_event()  # this will fire a signal which will update a cache value
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
         listener.execute()  # updated cache value from previous line will force data to be re-fetched from the backend
@@ -298,16 +305,58 @@ class EventListenerTestCase(TestCase):
 
         deposit_value = to_wei(1, 'ether')
 
-        tx_hash = self.bank_contract.functions.deposit().\
+        tx_hash = self.bank_contract.functions.deposit(). \
             transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
 
         listener = EventListener(rpc_provider=self.provider)
         listener.execute()
 
         failed_events = FailedEventLog.objects.all()
-        self.assertEqual(listener.daemon.block_number, self.web3.eth.blockNumber, "Exception did not cause listener to stop")
+        self.assertEqual(listener.daemon.block_number, self.web3.eth.blockNumber,
+                         "Exception did not cause listener to stop")
         self.assertEqual(failed_events.count(), 1, "Failed event log created")
         stored_args = json.loads(failed_events.first().args)
         self.assertEqual(stored_args['amount'], deposit_value, "Failed event log saved correct arguments")
 
+    def test_event_listener_task(self):
+        """Test that the event listener task is working as intended"""
+        deposit_value = to_wei(1, 'ether')
+        event = self._create_deposit_event()
+
+        tx_hash = self.bank_contract.functions.deposit(). \
+            transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
+
+        current = self.web3.eth.blockNumber
+        event_listener()
+
+        daemon = Daemon.get_solo()
+        self.assertEqual(daemon.block_number, current, 'Task run successfully')
+        self.assertEqual(daemon.last_error_block_number, 0, 'No errors during task execution')
+
+    def test_event_listener_task_exception_raised(self):
+        """Determine if the event listener task correctly sets the daemon.last_error_block_number
+        when an exception occurs that is unhandled.
+
+        """
+        current = self.web3.eth.blockNumber
+        event_listener()
+        daemon = Daemon.get_solo()
+
+        self.assertEqual(daemon.block_number, current, 'Task run successfully')
+        self.assertEqual(daemon.last_error_block_number, 0, 'No errors during task execution')
+
+        # Create a new monitored event, run the task again but with the `get_block_logs` method patched
+        # to simulate an error raised from the web3 instance (e.g. rcp node is down)
+        deposit_value = to_wei(1, 'ether')
+        event = self._create_deposit_event()
+
+        tx_hash = self.bank_contract.functions.deposit(). \
+            transact({'from': self.web3.eth.accounts[0], 'value': deposit_value})
+
+        with patch.object(EventListener, 'get_block_logs', patched_get_block_logs):
+            event_listener()
+
+        daemon.refresh_from_db()
+        self.assertEqual(daemon.block_number, current, 'Erroneous block was not processed')
+        self.assertEqual(daemon.last_error_block_number, current + 1, 'Error block was updated')
 

@@ -1,8 +1,11 @@
 import json
 
 from django.core.cache import cache
+
 from eth_utils import event_abi_to_log_topic
+
 from hexbytes import HexBytes
+
 from web3.utils.datastructures import AttributeDict
 
 
@@ -10,7 +13,7 @@ def get_event_abi(abi, event_name):
     """Helper function that extracts the event abi from the given abi.
 
     Args:
-        abi (dict): the contract abi
+        abi (list): the contract abi
         event_name (str): the event name
 
     Returns:
@@ -21,10 +24,19 @@ def get_event_abi(abi, event_name):
                 entry['type'] == "event":
             return entry
     raise ValueError(
-        'Event `{}` not found in the contract abi'.format(event_name))
+        'Event `{0}` not found in the contract abi'.format(event_name))
 
 
 def event_topic_from_contract_abi(abi, event_name):
+    """Returns the event topic from the contract abi.
+
+    Args:
+        abi (obj): contract abi
+        event_name (str): the desired event
+
+    Returns:
+        the event topic in hexstring form
+    """
     if isinstance(abi, str):
         abi = json.loads(abi)
 
@@ -51,6 +63,8 @@ class Singleton(type):
 
 
 class HexJsonEncoder(json.JSONEncoder):
+    """JSONEncoder that parses decoded logs as returned from `web3.utils.events.get_event_data`."""
+
     def default(self, obj):
         if isinstance(obj, HexBytes):
             return obj.hex()

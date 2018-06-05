@@ -3,7 +3,7 @@ from django.contrib import admin
 from solo.admin import SingletonModelAdmin
 
 from .forms import MonitoredEventForm
-from .models import Daemon, MonitoredEvent
+from .models import Daemon, FailedEventLog, MonitoredEvent
 
 admin.site.register(Daemon, SingletonModelAdmin)
 
@@ -24,3 +24,12 @@ class MonitoredEventAdmin(admin.ModelAdmin):
 
 
 admin.site.register(MonitoredEvent, MonitoredEventAdmin)
+
+
+class FailedEventLogAdmin(admin.ModelAdmin):
+    list_display = ['id', 'event', 'block_number', 'log_index', 'address', 'transaction_hash', 'created']
+    list_filter = ['address']
+    search_fields = ['event']
+
+
+admin.site.register(FailedEventLog, FailedEventLogAdmin)

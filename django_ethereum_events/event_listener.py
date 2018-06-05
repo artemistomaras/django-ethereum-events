@@ -6,10 +6,10 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.module_loading import import_string
 
-from django_ethereum_events.utils import refresh_cache_update_value, HexJsonEncoder
 from .decoder import Decoder
 from .exceptions import UnknownBlock
-from .models import Daemon, CACHE_UPDATE_KEY, FailedEventLog
+from .models import CACHE_UPDATE_KEY, Daemon, FailedEventLog
+from .utils import HexJsonEncoder, refresh_cache_update_value
 from .web3_service import Web3Service
 
 logger = logging.getLogger(__name__)
@@ -101,6 +101,7 @@ class EventListener:
                 event_receiver_cls = import_string(event_receiver)
                 event_receiver_cls().save(decoded_event=decoded_log)
             except Exception:
+                # Save the event information that caused the exception
                 failed_event = FailedEventLog.objects.create(
                     event=decoded_log.event,
                     transaction_hash=decoded_log.transactionHash.hex(),
@@ -113,10 +114,16 @@ class EventListener:
                     monitored_event=self.decoder.topics[topic]
                 )
 
-                logger.error('Exception while calling {}. FailedEventLog with pk={} created.'.format(
+                logger.error('Exception while calling {0}. FailedEventLog entry with id {1} created.'.format(
                     event_receiver, failed_event.pk), exc_info=True)
 
     def check_for_state_updates(self, block_number):
+        """If a MonitoredEvent has been added, updated, deleted, the decoder state is updated.
+
+        Args:
+            block_number: current working block
+
+        """
         update_required = cache.get(CACHE_UPDATE_KEY, False)
         if update_required:
             self.decoder.refresh_state(block_number=block_number)

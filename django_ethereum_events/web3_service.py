@@ -1,12 +1,12 @@
 from django.conf import settings
-from django.utils.six import with_metaclass
+
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 
 from .utils import Singleton
 
 
-class Web3Service(with_metaclass(Singleton)):
+class Web3Service(metaclass=Singleton):
     """Creates a `web3` instance based on the given Provider."""
 
     def __init__(self, *args, **kwargs):
