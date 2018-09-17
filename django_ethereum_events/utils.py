@@ -1,8 +1,11 @@
 import json
 
 from django.core.cache import cache
-from eth_utils import event_abi_to_log_topic, encode_hex
+
+from eth_utils import encode_hex, event_abi_to_log_topic
+
 from hexbytes import HexBytes
+
 from web3.utils.datastructures import AttributeDict
 
 
