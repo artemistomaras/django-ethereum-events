@@ -2,7 +2,7 @@ import json
 
 from django.core.cache import cache
 
-from eth_utils import event_abi_to_log_topic
+from eth_utils import event_abi_to_log_topic, encode_hex
 
 from hexbytes import HexBytes
 
@@ -71,5 +71,5 @@ class HexJsonEncoder(json.JSONEncoder):
         elif isinstance(obj, AttributeDict):
             return dict(obj)
         elif isinstance(obj, bytes):
-            return obj.decode('utf-8').rstrip('\u0000')
+            return encode_hex(obj)
         return super().default(obj)
