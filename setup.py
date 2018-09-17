@@ -14,11 +14,11 @@ DEPENDENCIES = [
     "eth-utils>=1.0.1",
     "eth-abi>=1.0.0",
     "django-solo>=1.1.0",
-    "web3>=4.0.0",
+    "web3>=4.0.0,<4.3.0",
     "rlp<=0.6.0"
 ]
 TEST_DEPENDENCIES = [
-    "eth-tester[pyethereum21]"
+    "eth-tester[pyethereum21]==0.1.0-beta.24"
 ]
 
 setup(

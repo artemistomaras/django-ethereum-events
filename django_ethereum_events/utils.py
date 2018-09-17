@@ -1,15 +1,9 @@
 import json
 
 from django.core.cache import cache
-
 from eth_utils import event_abi_to_log_topic, encode_hex
-
 from hexbytes import HexBytes
-
-try:
-    from web3.utils.datastructures import AttributeDict
-except ImportError:
-    from web3.datastructures import AttributeDict
+from web3.utils.datastructures import AttributeDict
 
 
 def get_event_abi(abi, event_name):
