@@ -9,16 +9,16 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 DEPENDENCIES = [
-    "Django>=1.10",
+    "Django>=1.11",
     "celery>=3.1.25",
-    "eth-utils>=1.0.1",
-    "eth-abi>=1.0.0",
+    "eth-utils>=1.0.1,<1.1.1",
+    "eth-abi>=1.1.0",
     "django-solo>=1.1.0",
-    "web3>=4.0.0,<4.3.0",
+    "web3>=4.0.0,!=4.4.0,<4.5.0",
     "rlp<=0.6.0"
 ]
 TEST_DEPENDENCIES = [
-    "eth-tester[pyethereum21]==0.1.0-beta.24"
+    "eth-tester[pyethereum21]==0.1.0-beta.31"
 ]
 
 setup(
