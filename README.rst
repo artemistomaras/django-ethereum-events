@@ -120,6 +120,7 @@ Usage
 *****
 More about the event receivers
 *****
+
 It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own:
 
     ::
