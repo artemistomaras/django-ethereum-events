@@ -14,7 +14,7 @@ DEPENDENCIES = [
     "eth-utils>=1.0.1,<1.1.1",
     "eth-abi>=1.1.0,<1.2.0",
     "django-solo>=1.1.0",
-    "web3>=4.0.0,!=4.4.0,<4.5.0",
+    "web3>=4.1.0,!=4.4.0,<4.5.0",
     "rlp<=0.6.0"
 ]
 TEST_DEPENDENCIES = [
