@@ -8,9 +8,16 @@ addons:
       - libgmp-dev
       - libffi-dev
 env:
-  - DJANGO=1.10 WEBTHREE=4.0
   - DJANGO=1.11 WEBTHREE=4.0
+  - DJANGO=1.11 WEBTHREE=4.1
+  - DJANGO=1.11 WEBTHREE=4.2
+  - DJANGO=1.11 WEBTHREE=4.3
+  - DJANGO=1.11 WEBTHREE=4.4
   - DJANGO=2.0 WEBTHREE=4.0
+  - DJANGO=2.0 WEBTHREE=4.1
+  - DJANGO=2.0 WEBTHREE=4.2
+  - DJANGO=2.0 WEBTHREE=4.3
+  - DJANGO=2.0 WEBTHREE=4.4
 matrix:
   include:
     - python: "3.6"
