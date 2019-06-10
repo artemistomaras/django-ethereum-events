@@ -89,8 +89,7 @@ Usage
 3.  Create an appropriate event receiver
 
     ::
-        
-        # inside myapp.event_receivers
+
         from django_ethereum_events.chainevents import AbstractEventReceiver
 
         class CustomEventReceiver(AbsractEventReceiver):
@@ -117,9 +116,9 @@ Usage
     You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
 
 
-*****
+******************************
 More about the event receivers
-*****
+******************************
 
 It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own:
 
@@ -137,16 +136,16 @@ a new instance of the ``django_ethereum_events.models.FailedEventLog`` containin
 The event listener does **not** attempt to rerun ``FailedEventLogs``. That is up to the client implementation.
 
 
-*****
+****************************
 Resetting the internal state
-*****
+****************************
 Blocks are processed only once. The last block processed is stored in the ``.models.Daemon`` entry.
 
 To reset the number of blocks processed, run the ``reset_block_daemon`` command optionally specifying the block number (-b, --block) to reset to (defaults to zero). If you reset it to zero, the next time the ``event_listener`` is fired, it will start processing blocks from the genesis block.
 
 The ``Daemon`` entry can also be changed from the django admin backend.
 
-*****
+***************************
 Proof-of-Authority Networks
-*****
+***************************
 To use this package on **Rinkeby** or any other private network that uses the Proof-of-Authority consensus engine (also named clique), set the optional ``ETHEREUM_GETH_POA`` setting to ``True``.
