@@ -2,7 +2,7 @@ import json
 from copy import deepcopy
 
 from django.test import TestCase
-from eth_tester import EthereumTester, PyEthereum21Backend
+from eth_tester import EthereumTester, PyEVMBackend
 from eth_utils import to_wei
 from hexbytes import HexBytes
 from web3 import EthereumTesterProvider, Web3
@@ -28,7 +28,7 @@ class DecoderTestCase(TestCase):
     def setUpTestData(cls):
         super(DecoderTestCase, cls).setUpTestData()
 
-        cls.eth_tester = EthereumTester(backend=PyEthereum21Backend())
+        cls.eth_tester = EthereumTester(backend=PyEVMBackend())
         cls.provider = EthereumTesterProvider(cls.eth_tester)
         cls.web3 = Web3(cls.provider)
 
@@ -112,4 +112,4 @@ class DecoderTestCase(TestCase):
 
         self.assertEqual(len(decoded_logs), 1, "Log decoded")
         self.assertEqual(decoded_logs[0][1].args.amount, to_wei(1, 'ether'), "Log `amount` parameter is correct")
-        self.assertEqual(decoded_logs[0][1].args.owner, self.web3.eth.accounts[0], "Log `owner` parameter is correct")
+        self.assertEqual(decoded_logs[0][1].args.owner, '0x82A978B3f5962A5b0957d9ee9eEf472EE55B42F1', "Log `owner` parameter is correct")

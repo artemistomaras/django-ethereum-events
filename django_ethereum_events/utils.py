@@ -6,7 +6,7 @@ from eth_utils import encode_hex, event_abi_to_log_topic
 
 from hexbytes import HexBytes
 
-from web3.utils.datastructures import AttributeDict
+from web3.datastructures import AttributeDict
 
 
 def get_event_abi(abi, event_name):

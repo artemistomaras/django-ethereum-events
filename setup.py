@@ -11,20 +11,17 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 DEPENDENCIES = [
     "Django>=1.11",
     "celery>=3.1.25",
-    "eth-utils>=1.0.1,<1.1.1",
-    "eth-abi>=1.1.0,<1.2.0",
     "django-solo>=1.1.0",
-    "web3>=4.1.0,!=4.4.0,<4.5.0",
-    "rlp<=0.6.0",
-    "eth-keys==0.2.0b3"
+    "web3>=4.9.2,<5",
+
 ]
 TEST_DEPENDENCIES = [
-    "eth-tester[pyethereum21]==0.1.0-beta.31"
+    "eth-tester[py-evm]==0.1.0-beta.33"
 ]
 
 setup(
     name='django-ethereum-events',
-    version='1.0.5',
+    version='2.0.1',
     packages=find_packages(),
     include_package_data=True,
     install_requires=DEPENDENCIES,

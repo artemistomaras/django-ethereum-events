@@ -21,7 +21,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'django_ethereum_events',
-    'solo'
+    'solo',
+    'dev'
 )
 
 CACHES = {
@@ -80,3 +81,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 STATIC_ROOT = path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+
+ETHEREUM_NODE_HOST = 'localhost'
+ETHEREUM_NODE_PORT = 8545
+ETHEREUM_NODE_SSL = False

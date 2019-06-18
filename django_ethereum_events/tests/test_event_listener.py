@@ -2,7 +2,7 @@ import json
 from unittest.mock import patch
 
 from django.test import TestCase
-from eth_tester import EthereumTester, PyEthereum21Backend
+from eth_tester import EthereumTester, PyEVMBackend
 from eth_utils import to_wei, to_bytes
 from web3 import EthereumTesterProvider, Web3
 
@@ -61,7 +61,7 @@ class EventListenerTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.eth_tester = EthereumTester(backend=PyEthereum21Backend())
+        cls.eth_tester = EthereumTester(backend=PyEVMBackend())
         cls.provider = EthereumTesterProvider(cls.eth_tester)
         cls.web3 = Web3(cls.provider)
 
