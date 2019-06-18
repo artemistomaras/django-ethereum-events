@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.5"
   - "3.6"
 addons:
   apt:
@@ -8,18 +7,10 @@ addons:
       - libgmp-dev
       - libffi-dev
 env:
-  - DJANGO=1.11 WEBTHREE=4.1
-  - DJANGO=1.11 WEBTHREE=4.2
-  - DJANGO=1.11 WEBTHREE=4.3
-  - DJANGO=1.11 WEBTHREE=4.4
-  - DJANGO=2.0 WEBTHREE=4.1
-  - DJANGO=2.0 WEBTHREE=4.2
-  - DJANGO=2.0 WEBTHREE=4.3
-  - DJANGO=2.0 WEBTHREE=4.4
-  - DJANGO=2.1 WEBTHREE=4.1
-  - DJANGO=2.1 WEBTHREE=4.2
-  - DJANGO=2.1 WEBTHREE=4.3
-  - DJANGO=2.1 WEBTHREE=4.4
+  - DJANGO=1.11 WEBTHREE=4.9
+  - DJANGO=2.0 WEBTHREE=4.9
+  - DJANGO=2.1 WEBTHREE=4.9
+  - DJANGO=2.2 WEBTHREE=4.9
 matrix:
   include:
     - python: "3.6"
