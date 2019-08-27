@@ -118,14 +118,14 @@ Usage
 More about the event receivers
 ******************************
 
-It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own:
+It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own
 
-    .. code-block:: python
+.. code-block:: python
 
-        # inside the CustomEventReceiver.save method
-        from django_ethereum_events.utils import HexJsonEncoder
-        decoded_event_data = json.dumps(decoded_event, cls=HexJsonEncoder)
-        my_custom_task.delay(decoded_event_data)
+    # inside the CustomEventReceiver.save method
+    from django_ethereum_events.utils import HexJsonEncoder
+    decoded_event_data = json.dumps(decoded_event, cls=HexJsonEncoder)
+    my_custom_task.delay(decoded_event_data)
         
    
 If an unhandled exception is raised inside the event receiver, the ``event_listener`` task logs the error and creates
