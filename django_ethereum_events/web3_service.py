@@ -19,7 +19,7 @@ class Web3Service(metaclass=Singleton):
         if not rpc_provider:
             timeout = getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
 
-            uri = settings.ETHEREUM_NODE_PORT
+            uri = settings.ETHEREUM_NODE_URI
             rpc_provider = HTTPProvider(
                 endpoint_uri=uri,
                 request_kwargs={
