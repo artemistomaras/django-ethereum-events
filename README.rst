@@ -41,7 +41,7 @@ Installation
 
 2.  Make sure to include ``'django_ethereum_events'`` in your ``INSTALLED_APPS``
 
-    ::
+    .. code-block:: python
 
         INSTALLED_APPS += ('django_ethereum_events')
     
@@ -49,7 +49,7 @@ Installation
    
 3.  Make necessary migrations
 
-    ::
+    .. code-block:: python
 
         python manage.py migrate django_ethereum_events
 
@@ -60,14 +60,14 @@ Usage
 
 1.  In your ``settings`` file, specify the following settings
 
-    ::
+    .. code-block:: python
 
         ETHEREUM_NODE_URI = 'http://localhost:8545'
          
          
 2.  Create a new MonitoredEvent
     
-    ::
+    .. code-block:: python
     
         contract_abi = """
         The whole contract abi goes here
@@ -86,7 +86,7 @@ Usage
         
 3.  Create an appropriate event receiver
 
-    ::
+    .. code-block:: python
 
         from django_ethereum_events.chainevents import AbstractEventReceiver
 
@@ -96,11 +96,11 @@ Usage
 
     The ``decoded_event`` parameter is the decoded log as provided from `web3.utils.events.get_event_data`_ method.
     
-    .. _`web3.utils.events.get_event_data`: https://github.com/pipermerriam/web3.py/blob/master/web3/utils/events.py#L143
+    .. _`web3.utils.events.get_event_data`: https://github.com/ethereum/web3.py/blob/v4.9.2/web3/utils/events.py#L148
 
 4.  To start monitoring the blockchain, either run the celery task ``django_ethereum_events.tasks.event_listener`` or better, use ``celerybeat`` to run it as a periodical task
 
-    ::
+    .. code-block:: python
 
         from celery.beat import crontab
 
@@ -120,8 +120,8 @@ More about the event receivers
 
 It is advisable that the code inside the custom event receiver to be simple since it is run synchronously while the ``event_listener`` task is running. If that is not the case, pass the argument ``decoded_event`` to a celery task of your own:
 
-    ::
-    
+    .. code-block:: python
+
         # inside the CustomEventReceiver.save method
         from django_ethereum_events.utils import HexJsonEncoder
         decoded_event_data = json.dumps(decoded_event, cls=HexJsonEncoder)
