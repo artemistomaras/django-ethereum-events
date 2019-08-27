@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 
