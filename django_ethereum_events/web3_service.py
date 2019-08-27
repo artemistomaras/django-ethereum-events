@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 
@@ -19,11 +18,7 @@ class Web3Service(metaclass=Singleton):
         if not rpc_provider:
             timeout = getattr(settings, "ETHEREUM_NODE_TIMEOUT", 10)
 
-            uri = "{scheme}://{host}:{port}".format(
-                host=settings.ETHEREUM_NODE_HOST,
-                port=settings.ETHEREUM_NODE_PORT,
-                scheme="https" if settings.ETHEREUM_NODE_SSL else "http",
-            )
+            uri = settings.ETHEREUM_NODE_PORT
             rpc_provider = HTTPProvider(
                 endpoint_uri=uri,
                 request_kwargs={
