@@ -21,7 +21,7 @@ TEST_DEPENDENCIES = [
 
 setup(
     name='django-ethereum-events',
-    version='3.0.1',
+    version='3.0.2',
     packages=find_packages(),
     include_package_data=True,
     install_requires=DEPENDENCIES,
