@@ -61,6 +61,10 @@ class EventListener:
         if block and block.get('hash'):
             for tx in block['transactions']:
                 receipt = self.web3.eth.getTransactionReceipt(tx)
+
+                if receipt is None:
+                    continue
+
                 for log in receipt.get('logs', []):
                     address = log['address']
                     if address in self.decoder.watched_addresses and \
