@@ -35,6 +35,7 @@ setup(
         'web3>=5.5.0,<6',
     ],
     extras_require=extras_require,
+    tests_require=extras_require['tester'],
     python_requires='>=3.6,<4',
     license='MIT License',
     description='Django Ethereum Events',
