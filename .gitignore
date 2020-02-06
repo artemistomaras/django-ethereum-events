@@ -27,5 +27,11 @@ __pycache__
 
 .project
 .pydevproject
-django_ethereum_events/urls.py
-manage.py
+.coverage
+.coveragerc
+
+# Example
+example/contracts/chain
+example/contracts/node_modules
+example/contracts/build
+example/db.sqlite3

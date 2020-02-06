@@ -15,6 +15,7 @@ extras_require = {
     'dev': [
         'tox>=1.8.0'
         'twine>=1.13,<2'
+        'wheel'
     ],
     'linter': [
         'flake8==3.7.9'
@@ -30,7 +31,7 @@ extras_require['dev'] = (
 setup(
     name='django-ethereum-events',
     version='4.0.0',
-    packages=find_packages(exclude=['dev']),
+    packages=find_packages(exclude=['example']),
     include_package_data=True,
     install_requires=[
         'Django>=1.11',
