@@ -1,6 +1,7 @@
 import logging
 
-from web3.utils.events import get_event_data
+from web3 import Web3
+from web3._utils.events import get_event_data
 
 from django_ethereum_events.models import MonitoredEvent
 
@@ -24,6 +25,7 @@ class Decoder:
     def __init__(self, block_number, *args, **kwargs):
         super(Decoder, self).__init__(*args, **kwargs)
         self.refresh_state(block_number)
+        self.web3 = Web3()
 
     def refresh_state(self, block_number):
         """Fetches the monitored events from the database and updates the decoder state variables.
@@ -61,7 +63,7 @@ class Decoder:
         """
         log_topic = log['topics'][0].hex()
         event_abi = self.topics[log_topic].event_abi_parsed
-        decoded_log = get_event_data(event_abi, log)
+        decoded_log = get_event_data(self.web3.codec, event_abi, log)
         return log_topic, decoded_log
 
     def decode_logs(self, logs):
