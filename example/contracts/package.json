@@ -1,0 +1,27 @@
+{
+  "name": "echo-app",
+  "version": "1.0.0",
+  "description": "Example echo app",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/truffle test",
+    "compile": "./node_modules/.bin/truffle compile",
+    "dev-blockchain": "./node_modules/.bin/ganache-cli -d --db chain/",
+    "deploy-local": "./node_modules/.bin/truffle migrate --network local"
+  },
+  "author": {
+    "name": "Artemios Tomaras",
+    "email": "artemistomaras@gmail.com",
+    "url": "https://github.com/artemistomaras/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "ganache-cli": "^6.4.3",
+    "keythereum": "^1.0.4",
+    "truffle": "^5.0.19",
+    "truffle-assertions": "^0.9.2",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.2.4"
+  }
+}
