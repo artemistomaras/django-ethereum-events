@@ -15,12 +15,16 @@ extras_require = {
     'dev': [
         'tox>=1.8.0'
         'twine>=1.13,<2'
+    ],
+    'linter': [
+        'flake8==3.7.9'
     ]
 }
 
 extras_require['dev'] = (
     extras_require['tester'],
-    extras_require['dev']
+    extras_require['dev'],
+    extras_require['linter']
 )
 
 setup(
@@ -35,7 +39,6 @@ setup(
         'web3>=5.5.0,<6',
     ],
     extras_require=extras_require,
-    tests_require=extras_require['tester'],
     python_requires='>=3.6,<4',
     license='MIT License',
     description='Django Ethereum Events',
