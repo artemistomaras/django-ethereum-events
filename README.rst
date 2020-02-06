@@ -6,11 +6,11 @@ Ethereum Contract Event Log monitoring in Django
 
 .. image:: https://travis-ci.org/artemistomaras/django-ethereum-events.svg?branch=master
     :target: https://travis-ci.org/artemistomaras/django-ethereum-events
-    
-.. image:: https://img.shields.io/pypi/v/django-ethereum-events.svg   
+
+.. image:: https://img.shields.io/pypi/v/django-ethereum-events.svg
     :target: https://pypi.python.org/pypi/django-ethereum-events
-    
-    
+
+
 ********
 Overview
 ********
@@ -26,7 +26,7 @@ Package versions **0.2.x+** support **web3 v4**.
 If you want python 2.7 compatibility and/or **web3 v3** support, use version **0.1.x** of this package.
 
 
-.. _`Contract Events`: http://solidity.readthedocs.io/en/develop/contracts.html#events 
+.. _`Contract Events`: http://solidity.readthedocs.io/en/develop/contracts.html#events
 
 ************
 Installation
@@ -44,9 +44,9 @@ Installation
     .. code-block:: python
 
         INSTALLED_APPS += ('django_ethereum_events')
-    
+
     if you are using the **admin backend**, also include ``solo`` in your ``INSTALLED_APPS``.
-   
+
 3.  Make necessary migrations
 
     .. code-block:: python
@@ -63,27 +63,27 @@ Usage
     .. code-block:: python
 
         ETHEREUM_NODE_URI = 'http://localhost:8545'
-         
-         
+
+
 2.  Create a new MonitoredEvent
-    
+
     .. code-block:: python
-    
+
         contract_abi = """
         The whole contract abi goes here
         """
-        
+
         event = "MyEvent"  # the emitted event name
         event_receiver = "myapp.event_receivers.CustomEventReceiver"
         contract_address = "0x10f683d9acc908cA6b7A34726271229B846b0292"  # the address of the contract emitting the event
-        
+
         MonitoredEvent.object.register_event(
             event_name=event,
             contract_address=contract_address,
             contract_abi=contract_abi,
             event_receiver=event_receiver
         )
-        
+
 3.  Create an appropriate event receiver
 
     .. code-block:: python
@@ -95,8 +95,8 @@ Usage
                 # custom logic goes here
 
     The ``decoded_event`` parameter is the decoded log as provided from `web3.utils.events.get_event_data`_ method.
-    
-    .. _`web3.utils.events.get_event_data`: https://github.com/ethereum/web3.py/blob/v4.9.2/web3/utils/events.py#L148
+
+    .. _`web3.utils.events.get_event_data`: https://github.com/ethereum/web3.py/blob/v5.5.0/web3/_utils/events.py#L198
 
 4.  To start monitoring the blockchain, either run the celery task ``django_ethereum_events.tasks.event_listener`` or better, use ``celerybeat`` to run it as a periodical task
 
@@ -126,8 +126,8 @@ It is advisable that the code inside the custom event receiver to be simple sinc
     from django_ethereum_events.utils import HexJsonEncoder
     decoded_event_data = json.dumps(decoded_event, cls=HexJsonEncoder)
     my_custom_task.delay(decoded_event_data)
-        
-   
+
+
 If an unhandled exception is raised inside the event receiver, the ``event_listener`` task logs the error and creates
 a new instance of the ``django_ethereum_events.models.FailedEventLog`` containing all the relevant event information.
 
