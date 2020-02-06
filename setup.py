@@ -8,27 +8,34 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-DEPENDENCIES = [
-    "Django>=1.11",
-    "celery>=3.1.25",
-    "django-solo>=1.1.0",
-    "web3>=5.5.0,<6",
+extras_require = {
+    'tester': [
+        'eth-tester[py-evm]==v0.2.0-beta.2'
+    ],
+    'dev': [
+        'tox>=1.8.0'
+        'twine>=1.13,<2'
+    ]
+}
 
-]
-TEST_DEPENDENCIES = [
-    "eth-tester[py-evm]==v0.2.0-beta.2"
-]
+extras_require['dev'] = (
+    extras_require['tester'],
+    extras_require['dev']
+)
 
 setup(
     name='django-ethereum-events',
     version='4.0.0',
-    packages=find_packages(),
+    packages=find_packages(exclude=['dev']),
     include_package_data=True,
-    install_requires=DEPENDENCIES,
-    tests_require=TEST_DEPENDENCIES,
-    extras_require={
-        "test": TEST_DEPENDENCIES,
-    },
+    install_requires=[
+        'Django>=1.11',
+        'celery>=3.1.25',
+        'django-solo>=1.1.0',
+        'web3>=5.5.0,<6',
+    ],
+    extras_require=extras_require,
+    python_requires='>=3.6,<4',
     license='MIT License',
     description='Django Ethereum Events',
     long_description=README,
