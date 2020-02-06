@@ -12,16 +12,16 @@ DEPENDENCIES = [
     "Django>=1.11",
     "celery>=3.1.25",
     "django-solo>=1.1.0",
-    "web3>=4.9.2,<5",
+    "web3>=5.5.0,<6",
 
 ]
 TEST_DEPENDENCIES = [
-    "eth-tester[py-evm]==0.1.0-beta.33"
+    "eth-tester[py-evm]==v0.2.0-beta.2"
 ]
 
 setup(
     name='django-ethereum-events',
-    version='3.0.2',
+    version='4.0.0',
     packages=find_packages(),
     include_package_data=True,
     install_requires=DEPENDENCIES,
