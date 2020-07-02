@@ -31,6 +31,6 @@ class Web3Service(metaclass=Singleton):
 
         # If running in a network with PoA consensus, inject the middleware
         if getattr(settings, "ETHEREUM_GETH_POA", False):
-            self.web3.middleware_stack.inject(geth_poa_middleware, layer=0)
+            self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         super(Web3Service, self).__init__()
