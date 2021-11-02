@@ -24,7 +24,8 @@ def cache_lock(lock_id, lock_value):
     try:
         yield status
     finally:
-        cache.delete(lock_id)
+        if status:
+            cache.delete(lock_id)
 
 
 @shared_task
