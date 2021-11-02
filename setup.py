@@ -30,7 +30,7 @@ extras_require['dev'] = (
 
 setup(
     name='django-ethereum-events',
-    version='4.1.0',
+    version='4.1.1',
     packages=find_packages(exclude=['example']),
     include_package_data=True,
     install_requires=[
