@@ -4,7 +4,10 @@ import json
 from django import forms
 from django.forms import widgets
 from django.utils.module_loading import import_string
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from eth_utils import add_0x_prefix, event_abi_to_log_topic, is_hex_address
 
