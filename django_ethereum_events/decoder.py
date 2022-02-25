@@ -12,9 +12,8 @@ class Decoder:
     """Event log decoder.
 
     Attributes:
-        watched_addresses (list): List of contract addresses, in hexstring form, that are monitored for event logs.
-        topics (dict): maps hexstring representation of log topics to MonitoredEvents
         monitored_events (QuerySet): retrieved monitored events
+        monitored_events: dict (address, topic) => monitored_event
 
     """
 
@@ -36,13 +35,12 @@ class Decoder:
         """
         self.watched_addresses.clear()
         self.topics.clear()
-        self.monitored_events = MonitoredEvent.objects.all()
+        self.monitored_events = {}  # dict (address, topic) => [monitored_event1, monitored_event2, ...]
 
-        for monitored_event in self.monitored_events:
-            self.topics[monitored_event.topic] = monitored_event
-
-            if monitored_event.contract_address not in self.watched_addresses:
-                self.watched_addresses.append(monitored_event.contract_address)
+        for monitored_event in MonitoredEvent.objects.all():
+            self.monitored_events[
+                (monitored_event.contract_address.lower(), monitored_event.topic)
+            ] = monitored_event
 
             if monitored_event.monitored_from is None:
                 monitored_event.monitored_from = block_number
@@ -62,9 +60,13 @@ class Decoder:
 
         """
         log_topic = log['topics'][0].hex()
-        event_abi = self.topics[log_topic].event_abi_parsed
+        address = log['address'].lower()
+        mon_evt = self.monitored_events.get((address, log_topic), None)
+        if mon_evt is None:
+            return None  # combination of (address, topic) not monitored
+        event_abi = mon_evt.event_abi_parsed
         decoded_log = get_event_data(self.web3.codec, event_abi, log)
-        return log_topic, decoded_log
+        return (address, log_topic), decoded_log
 
     def decode_logs(self, logs):
         """Decode the given logs.
@@ -75,4 +77,9 @@ class Decoder:
             list: the decoded logs
 
         """
-        return [self.decode_log(log) for log in logs]
+        ret = []
+        for log in logs:
+            decoded = self.decode_log(log)
+            if decoded is not None:
+                ret.append(decoded)
+        return ret

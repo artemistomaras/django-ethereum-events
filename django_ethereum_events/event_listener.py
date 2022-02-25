@@ -66,9 +66,9 @@ class EventListener:
                     continue
 
                 for log in receipt.get('logs', []):
-                    address = log['address']
-                    if address in self.decoder.watched_addresses and \
-                            log['topics'][0].hex() in self.decoder.topics:
+                    address = log['address'].lower()
+                    topic = log['topics'][0].hex()
+                    if (address, topic) in self.decoder.monitored_events:
                         relevant_logs.append(log)
             return relevant_logs
         else:
@@ -98,8 +98,8 @@ class EventListener:
             decoded_logs (:obj:`list` of :obj:`dict`): The decoded logs.
 
         """
-        for topic, decoded_log in decoded_logs:
-            event_receiver = self.decoder.topics[topic].event_receiver
+        for (address, topic), decoded_log in decoded_logs:
+            event_receiver = self.decoder.monitored_events[(address, topic)].event_receiver
 
             try:
                 event_receiver_cls = import_string(event_receiver)
@@ -115,7 +115,7 @@ class EventListener:
                     log_index=decoded_log.logIndex,
                     address=decoded_log.address,
                     args=json.dumps(decoded_log.args, cls=HexJsonEncoder),
-                    monitored_event=self.decoder.topics[topic]
+                    monitored_event=self.decoder.monitored_events[(address, topic)]
                 )
 
                 logger.error('Exception while calling {0}. FailedEventLog entry with id {1} created.'.format(
