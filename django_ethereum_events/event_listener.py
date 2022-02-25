@@ -24,6 +24,15 @@ class EventListener:
         self.decoder = Decoder(block_number=self.daemon.block_number + 1)
         self.web3 = Web3Service(*args, **kwargs).web3
 
+    def _get_block_range(self):
+        current = self.web3.eth.blockNumber
+        step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
+        if self.daemon.block_number < current:
+            start = self.daemon.block_number + 1
+            return start, min(current, start + step)
+
+        return None, None
+
     def get_pending_blocks(self):
         """
         Retrieve the blocks that have not been processed.
@@ -33,14 +42,11 @@ class EventListener:
             the unprocessed block numbers.
 
         """
-        pending_blocks = []
-        current = self.web3.eth.blockNumber
-        step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
-        if self.daemon.block_number < current:
-            start = self.daemon.block_number + 1
-            pending_blocks = list(range(start, min(current, start + step) + 1))
-
-        return pending_blocks
+        start, end = self._get_block_range()
+        if start is None:
+            return []
+        else:
+            return list(range(start, end + 1))
 
     def update_block_number(self, block_number):
         """Updates the internal block_number counter."""
@@ -135,6 +141,34 @@ class EventListener:
 
     def execute(self):
         """Program loop, does all the underlying work."""
+        if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False):
+            self._execute_using_filters()
+        else:
+            self._execute_iterating_all_blocks()
+
+    def _execute_using_filters(self):
+        """Uses filters to fetch required logs"""
+        start, end = self._get_block_range()
+        if start is None:
+            return
+        all_logs = []
+
+        for (address, topic) in self.decoder.monitored_events.keys():
+            log_filter = self.web3.eth.filter({
+                "topic": topic,
+                "address": address,
+                "fromBlock": start,
+                "toBlock": end,
+            })
+            all_logs.extend(log_filter.get_all_entries())
+
+        all_logs.sort(key=lambda log: (log["blockNumber"], log["logIndex"]))
+        decoded_logs = self.decoder.decode_logs(all_logs)
+        self.save_events(decoded_logs)
+        self.update_block_number(end)
+
+    def _execute_iterating_all_blocks(self):
+        """Executes iterating thru all blocks and txs"""
         pending_blocks = self.get_pending_blocks()
         for block in pending_blocks:
             self.check_for_state_updates(block)
