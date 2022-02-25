@@ -72,7 +72,7 @@ class EventListener:
                     continue
 
                 for log in receipt.get('logs', []):
-                    address = log['address'].lower()
+                    address = log['address']
                     topic = log['topics'][0].hex()
                     if (address, topic) in self.decoder.monitored_events:
                         relevant_logs.append(log)
@@ -155,7 +155,7 @@ class EventListener:
 
         for (address, topic) in self.decoder.monitored_events.keys():
             log_filter = self.web3.eth.filter({
-                "topic": topic,
+                "topics": [topic],
                 "address": address,
                 "fromBlock": start,
                 "toBlock": end,

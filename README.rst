@@ -114,6 +114,18 @@ Usage
     You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
 
 
+*******************
+Using event filters
+*******************
+
+If your Ethereum Node supports log filters, you can activate it in the Django settings and it will use filters instead of iterating thru all blocks and all transactions.
+
+    .. code-block:: python
+
+        ETHEREUM_LOGS_FILTER_AVAILABLE = True
+
+
+
 ******************************
 More about the event receivers
 ******************************

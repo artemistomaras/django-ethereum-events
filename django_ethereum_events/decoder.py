@@ -39,7 +39,7 @@ class Decoder:
 
         for monitored_event in MonitoredEvent.objects.all():
             self.monitored_events[
-                (monitored_event.contract_address.lower(), monitored_event.topic)
+                (monitored_event.contract_address, monitored_event.topic)
             ] = monitored_event
 
             if monitored_event.monitored_from is None:
@@ -60,7 +60,7 @@ class Decoder:
 
         """
         log_topic = log['topics'][0].hex()
-        address = log['address'].lower()
+        address = log['address']
         mon_evt = self.monitored_events.get((address, log_topic), None)
         if mon_evt is None:
             return None  # combination of (address, topic) not monitored

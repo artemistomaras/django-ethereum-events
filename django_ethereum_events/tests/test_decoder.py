@@ -123,11 +123,3 @@ class DecoderTestCase(TestCase):
         self.assertEqual(len(decoded_logs), 1, "Log decoded")
         self.assertEqual(decoded_logs[0][1].args.amount, to_wei(1, 'ether'), "Log `amount` parameter is correct")
         self.assertEqual(decoded_logs[0][1].args.owner, '0x82A978B3f5962A5b0957d9ee9eEf472EE55B42F1', "Log `owner` parameter is correct")
-
-        # Result doesn't change if lower/upper case
-        self.logs[0]["address"] = self.bank_address.upper()
-        decoded_logs = decoder.decode_logs(self.logs)
-
-        self.assertEqual(len(decoded_logs), 1, "Log decoded")
-        self.assertEqual(decoded_logs[0][1].args.amount, to_wei(1, 'ether'), "Log `amount` parameter is correct")
-        self.assertEqual(decoded_logs[0][1].args.owner, '0x82A978B3f5962A5b0957d9ee9eEf472EE55B42F1', "Log `owner` parameter is correct")
