@@ -87,7 +87,7 @@ class DecoderTestCase(TestCase):
         self._create_deposit_event()
         decoder = Decoder(block_number=0)
 
-        self.assertEqual(decoder.monitored_events.count(), 1, "LogDeposit is been monitored")
+        self.assertEqual(len(decoder.monitored_events), 1, "LogDeposit is been monitored")
 
     def test_monitored_event_removed_from_backend(self):
         """Test the functionality of the refresh_state method
@@ -95,19 +95,29 @@ class DecoderTestCase(TestCase):
         self._create_deposit_event()
         decoder = Decoder(block_number=0)
 
-        self.assertEqual(decoder.monitored_events.count(), 1, "LogDeposit is been monitored")
+        self.assertEqual(len(decoder.monitored_events), 1, "LogDeposit is been monitored")
 
         MonitoredEvent.objects.all().delete()
         decoder.refresh_state(block_number=1)
 
-        self.assertEqual(decoder.monitored_events.count(), 0, "No events to monitor")
+        self.assertEqual(len(decoder.monitored_events), 0, "No events to monitor")
 
-    def test_decode_logs(self):
+    def test_decode_logs_different_address(self):
         """Verify that the decoder correctly decodes the test logs.
         """
         self._create_deposit_event()
         decoder = Decoder(block_number=0)
 
+        self.logs[0]["address"] = "0xDD474B80D5EC7F0CF986eD7FBEe2a7b4Cdc73153"
+        decoded_logs = decoder.decode_logs(self.logs)
+        self.assertEqual(decoded_logs, [])  # empty response because wrong address
+
+    def test_decode_logs(self):
+        self._create_deposit_event()
+        decoder = Decoder(block_number=0)
+
+        # Fix logs' address
+        self.logs[0]["address"] = self.bank_address
         decoded_logs = decoder.decode_logs(self.logs)
 
         self.assertEqual(len(decoded_logs), 1, "Log decoded")

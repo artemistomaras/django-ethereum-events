@@ -359,4 +359,3 @@ class EventListenerTestCase(TestCase):
         daemon.refresh_from_db()
         self.assertEqual(daemon.block_number, current, 'Erroneous block was not processed')
         self.assertEqual(daemon.last_error_block_number, current + 1, 'Error block was updated')
-
