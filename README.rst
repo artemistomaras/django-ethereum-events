@@ -4,8 +4,8 @@ django-ethereum-events
 
 Ethereum Contract Event Log monitoring in Django
 
-.. image:: https://travis-ci.org/artemistomaras/django-ethereum-events.svg?branch=master
-    :target: https://app.travis-ci.com/artemistomaras/django-ethereum-events.svg?branch=master
+.. image:: https://app.travis-ci.com/artemistomaras/django-ethereum-events.svg?branch=master
+    :target: https://app.travis-ci.com/github/artemistomaras/django-ethereum-events
 
 .. image:: https://img.shields.io/pypi/v/django-ethereum-events.svg
     :target: https://pypi.python.org/pypi/django-ethereum-events
