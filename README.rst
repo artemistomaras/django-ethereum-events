@@ -125,6 +125,12 @@ If your Ethereum Node supports log filters, you can activate it in the Django se
         ETHEREUM_LOGS_FILTER_AVAILABLE = True
 
 
+Also you can try enable using ``web3.eth.getLogs(...)`` function instead ``web3.eth.filter(...).get_all_entries()``, when you receive errors like ``ValueError: {'code': -32000, 'message': 'filter not found'}`` or others. This happens with some Ethereum nodes (e.g. Infura or zkSync2).
+
+    .. code-block:: python
+        ETHEREUM_LOGS_FILTER_GETLOGS = True
+
+
 
 ******************************
 More about the event receivers

@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.module_loading import import_string
+from web3.types import FilterParams
 
 from .decoder import Decoder
 from .exceptions import UnknownBlock
@@ -154,13 +155,16 @@ class EventListener:
         all_logs = []
 
         for (address, topic) in self.decoder.monitored_events.keys():
-            log_filter = self.web3.eth.filter({
+            log_filter = {
                 "topics": [topic],
                 "address": address,
                 "fromBlock": start,
                 "toBlock": end,
-            })
-            all_logs.extend(log_filter.get_all_entries())
+            }
+            if getattr(settings, "ETHEREUM_LOGS_FILTER_GETLOGS", False):
+                all_logs.extend(self.web3.eth.get_logs(FilterParams(log_filter)))
+            else:
+                all_logs.extend(self.web3.eth.filter(log_filter).get_all_entries())
 
         all_logs.sort(key=lambda log: (log["blockNumber"], log["logIndex"]))
         decoded_logs = self.decoder.decode_logs(all_logs)
