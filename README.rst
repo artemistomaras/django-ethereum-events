@@ -77,7 +77,7 @@ Usage
         event_receiver = "myapp.event_receivers.CustomEventReceiver"
         contract_address = "0x10f683d9acc908cA6b7A34726271229B846b0292"  # the address of the contract emitting the event
 
-        MonitoredEvent.object.register_event(
+        MonitoredEvent.objects.register_event(
             event_name=event,
             contract_address=contract_address,
             contract_abi=contract_abi,
@@ -90,7 +90,7 @@ Usage
 
         from django_ethereum_events.chainevents import AbstractEventReceiver
 
-        class CustomEventReceiver(AbsractEventReceiver):
+        class CustomEventReceiver(AbstractEventReceiver):
             def save(self, decoded_event):
                 # custom logic goes here
 
