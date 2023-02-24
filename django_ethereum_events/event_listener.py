@@ -151,12 +151,12 @@ class EventListener:
 
         mode = mode or getattr(settings, "ETHEREUM_LOGS_MODE", None)
         if mode is None:
-            mode = "filters" if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False) else "all_blocks"
+            mode = "filters" if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False) else "blocks"
         elif mode == "auto":
             threshold = getattr(settings, "ETHEREUM_LOGS_AUTO_THRESHOLD", 5000)
-            mode = "all_blocks" if (end - start) <= threshold else "filters"
+            mode = "blocks" if (end - start) <= threshold else "filters"
 
-        if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False):
+        if mode == "filters":
             self._execute_using_filters()
         else:
             self._execute_iterating_all_blocks()

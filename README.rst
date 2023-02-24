@@ -114,15 +114,20 @@ Usage
     You can also set the optional ``ETHEREUM_LOGS_BATCH_SIZE`` setting which limits the maximum amount of the blocks that can be read at a time from the celery task.
 
 
-*******************
-Using event filters
-*******************
+***************
+Operation modes
+***************
 
-If your Ethereum Node supports log filters, you can activate it in the Django settings and it will use filters instead of iterating thru all blocks and all transactions.
+The event listener can operate in different modes:
+
+* `blocks`: this is the default mode, and goes block by block and tx by tx fetching the receipts and searching for logs matching the monitored ones.
+* `filters`: this uses `web3.eth.filter` to search each of the monitored events in the range.
+* `auto`: in this mode, the listener choose automatically wether to use `blocks` mode or `filters` mode, by checking if the number of blocks to process exceeds a given threshold (`ETHEREUM_LOGS_AUTO_THRESHOLD`, default 5000). If exceeds that threshold, uses `filters` mode, otherwise, uses `blocks` mode.
+
 
     .. code-block:: python
 
-        ETHEREUM_LOGS_FILTER_AVAILABLE = True
+        ETHEREUM_LOGS_MODE = "blocks"
 
 
 
