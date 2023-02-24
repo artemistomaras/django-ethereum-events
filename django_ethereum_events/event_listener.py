@@ -27,6 +27,9 @@ class EventListener:
     def _get_block_range(self):
         current = self.web3.eth.blockNumber
         step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
+        stay_behind = getattr(settings, "ETHEREUM_LOGS_STAY_BEHIND_BLOCKS", None)
+        if stay_behind:
+            current -= stay_behind
         if self.daemon.block_number < current:
             start = self.daemon.block_number + 1
             return start, min(current, start + step)
