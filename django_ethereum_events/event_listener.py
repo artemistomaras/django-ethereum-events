@@ -77,6 +77,8 @@ class EventListener:
 
                 for log in receipt.get('logs', []):
                     address = log['address']
+                    if not log['topics']:
+                        continue
                     topic = log['topics'][0].hex()
                     if (address, topic) in self.decoder.monitored_events:
                         relevant_logs.append(log)
