@@ -27,13 +27,16 @@ class EventListener:
     def _get_block_range(self):
         current = self.web3.eth.blockNumber
         step = getattr(settings, "ETHEREUM_LOGS_BATCH_SIZE", 10000)
+        stay_behind = getattr(settings, "ETHEREUM_LOGS_STAY_BEHIND_BLOCKS", None)
+        if stay_behind:
+            current -= stay_behind
         if self.daemon.block_number < current:
             start = self.daemon.block_number + 1
             return start, min(current, start + step)
 
         return None, None
 
-    def get_pending_blocks(self):
+    def get_pending_blocks(self, start=None, end=None):
         """
         Retrieve the blocks that have not been processed.
 
@@ -42,7 +45,8 @@ class EventListener:
             the unprocessed block numbers.
 
         """
-        start, end = self._get_block_range()
+        if start is None and end is None:
+            start, end = self._get_block_range()
         if start is None:
             return []
         else:
@@ -139,18 +143,26 @@ class EventListener:
             self.decoder.refresh_state(block_number=block_number)
             refresh_cache_update_value(update_required=False)
 
-    def execute(self):
+    def execute(self, mode=None):
         """Program loop, does all the underlying work."""
-        if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False):
-            self._execute_using_filters()
-        else:
-            self._execute_iterating_all_blocks()
-
-    def _execute_using_filters(self):
-        """Uses filters to fetch required logs"""
         start, end = self._get_block_range()
         if start is None:
             return
+
+        mode = mode or getattr(settings, "ETHEREUM_LOGS_MODE", None)
+        if mode is None:
+            mode = "filters" if getattr(settings, "ETHEREUM_LOGS_FILTER_AVAILABLE", False) else "blocks"
+        elif mode == "auto":
+            threshold = getattr(settings, "ETHEREUM_LOGS_AUTO_THRESHOLD", 5000)
+            mode = "blocks" if (end - start) <= threshold else "filters"
+
+        if mode == "filters":
+            self._execute_using_filters(start, end)
+        else:
+            self._execute_iterating_all_blocks(start, end)
+
+    def _execute_using_filters(self, start, end):
+        """Uses filters to fetch required logs"""
         all_logs = []
 
         for (address, topic) in self.decoder.monitored_events.keys():
@@ -160,16 +172,18 @@ class EventListener:
                 "fromBlock": start,
                 "toBlock": end,
             })
-            all_logs.extend(log_filter.get_all_entries())
+            all_logs.extend(
+                [evt for evt in log_filter.get_all_entries() if not evt.get("removed", False)]
+            )
 
         all_logs.sort(key=lambda log: (log["blockNumber"], log["logIndex"]))
         decoded_logs = self.decoder.decode_logs(all_logs)
         self.save_events(decoded_logs)
         self.update_block_number(end)
 
-    def _execute_iterating_all_blocks(self):
+    def _execute_iterating_all_blocks(self, start, end):
         """Executes iterating thru all blocks and txs"""
-        pending_blocks = self.get_pending_blocks()
+        pending_blocks = self.get_pending_blocks(start, end)
         for block in pending_blocks:
             self.check_for_state_updates(block)
             logs = self.get_block_logs(block)
