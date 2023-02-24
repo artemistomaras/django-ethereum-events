@@ -120,14 +120,15 @@ Operation modes
 
 The event listener can operate in different modes:
 
-* `blocks`: this is the default mode, and goes block by block and tx by tx fetching the receipts and searching for logs matching the monitored ones.
-* `filters`: this uses `web3.eth.filter` to search each of the monitored events in the range.
-* `auto`: in this mode, the listener choose automatically wether to use `blocks` mode or `filters` mode, by checking if the number of blocks to process exceeds a given threshold (`ETHEREUM_LOGS_AUTO_THRESHOLD`, default 5000). If exceeds that threshold, uses `filters` mode, otherwise, uses `blocks` mode.
+* ``blocks``: this is the default mode, and goes block by block and tx by tx fetching the receipts and searching for logs matching the monitored ones.
+* ``filters``: this uses ``web3.eth.filter`` to search each of the monitored events in the range.
+* ``auto``:  in this mode, the listener automatically chooses whether to use ``blocks`` mode or ``filters`` mode, by checking if the number of blocks to process exceeds a given threshold (``ETHEREUM_LOGS_AUTO_THRESHOLD``, default 5000). If it exceeds that threshold, it uses ``filters`` mode, otherwise, it uses ``blocks`` mode.
 
 
     .. code-block:: python
 
-        ETHEREUM_LOGS_MODE = "blocks"
+        ETHEREUM_LOGS_MODE = "auto"
+        ETHEREUM_LOGS_AUTO_THRESHOLD = 500
 
 
 
