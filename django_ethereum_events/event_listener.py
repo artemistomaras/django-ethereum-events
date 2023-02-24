@@ -157,9 +157,9 @@ class EventListener:
             mode = "blocks" if (end - start) <= threshold else "filters"
 
         if mode == "filters":
-            self._execute_using_filters()
+            self._execute_using_filters(start, end)
         else:
-            self._execute_iterating_all_blocks()
+            self._execute_iterating_all_blocks(start, end)
 
     def _execute_using_filters(self, start, end):
         """Uses filters to fetch required logs"""
